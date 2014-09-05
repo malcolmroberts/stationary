@@ -10,7 +10,7 @@ def stationary_part(list):
     # TODO: actually do some tests here.
     return list
 
-def ypart(list):
+def y_part(list):
     # copy the input list to a buffer for FFTs
     y=[]
     i=0
@@ -71,7 +71,7 @@ def main(argv):
     for row in csvReader:
         a.append(row)
     
-    y=ypart(a)
+    y=y_part(a)
     #print y
     yac=autocorrelate(y)
     print yac

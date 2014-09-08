@@ -6,12 +6,14 @@ import sys # to check for file existence, etc.
 import getopt # to pass command-line arguments
 import os.path #for file-existence checking
 
+# Do stationarity tests on a list or (t,value) pairs and return the
+# stationary tail.
 def stationary_part(list):
-    # TODO: actually do some tests here.
-    return list
+    stable=list # TODO: actually do some tests here.
+    return stable
 
+# Return the list of values from a list of (t,value) pairs.
 def y_part(list):
-    # copy the input list to a buffer for FFTs
     y=[]
     i=0
     while i < len(list):
@@ -19,6 +21,7 @@ def y_part(list):
         i += 1
     return y
 
+# Return the autocorrelation of the array of reals y.
 def autocorrelate(y):
     ypad=[]
     i=0
@@ -36,15 +39,57 @@ def autocorrelate(y):
     yac = np.fft.irfft(Y)
     end=np.floor(len(yac)/2)
     yac = yac[0:end]
-    norm=yac[0]
-    i=0
-    while i < len(yac):
-        yac[i] /= norm
-        i += 1
     return yac
 
-def main(argv):
+# Normalize an array by the value of the first element.
+def normalize_by_first(y):
+    norm=y[0]
+    i=0
+    while i < len(y):
+        y[i] /= norm
+        i += 1
+    return y
 
+# Return the index of the largest mode in a Fourier series Y.
+def dominant_mode(Y):
+    max=0.0
+    i=0
+    imax=0
+    while i < len(Y):
+        amp=Y[i].real*Y[i].real + Y[i].imag*Y[i].imag
+        if amp > max:
+            max=amp
+            imax=i
+        i += 1
+    return imax
+
+# Return the max of the quadratic spline going through three equally
+# spaced points with y-values y0, y1, and y2.
+def paramax(y0, y1, y2):
+    0.5*(y0 - y2)/(y0 - 2*y1 +y2)
+
+# Return the value of the quadratic spline at position x between
+# equally spaced points with input values y0, y1, and y2.
+def spline(x, y0, y1, y2):
+    x0=-1.0
+    x1=0.0
+    x2=1.0
+    L0=1.0
+    L0 *= (x-x1)/(x0-x1)
+    L0 *= (x-x2)/(x0-x2)
+
+    L1=1.0
+    L1 *= (x-x0)/(x1-x0)
+    L1 *= (x-x2)/(x1-x2)
+    
+    L2=1.0
+    L1 *= (x-x0)/(x2-x0)
+    L0 *= (x-x1)/(x2-x1)
+  
+    return y0*L0 + y1*L1 + y2*L2
+
+# Main program
+def main(argv):
     usage="./stationary -f <filename>"
 
     filename=""
@@ -72,9 +117,17 @@ def main(argv):
         a.append(row)
     
     y=y_part(a)
+    # TODO: remove the linear fit (or just the mean?)
     #print y
     yac=autocorrelate(y)
-    print yac
+    yac=normalize_by_first(yac)
+    #print yac
+
+    fac=np.fft.rfft(yac)
+
+    #print fac
+    print dominant_mode(fac)
+
 
 # The main program is called from here
 if __name__ == "__main__":

@@ -79,7 +79,6 @@ def normalize_by_first(y):
 def abs(z):
     return np.sqrt(z.real*z.real + z.imag*z.imag)
 
-
 # Return the max of the quadratic spline going through three equally
 # spaced points with y-values y0, y1, and y2.
 def paramax(y0, y1, y2):
@@ -107,6 +106,7 @@ def spline(x, y0, y1, y2):
     x1=0.0
     x2=1.0
     L0=1.0
+
     L0 *= (x-x1)/(x0-x1)
     L0 *= (x-x2)/(x0-x2)
 
@@ -120,6 +120,26 @@ def spline(x, y0, y1, y2):
   
     return y0*L0 + y1*L1 + y2*L2
 
+def typical_period(period, y):
+    # The length of the the output array is the floor of the period length:
+    n=int(np.floor(period))
+
+    # Number of periods in y:
+    nperiod=int(np.floor(len(y)/period))
+    print "There were "+str(nperiod)+" period(s) found in the data."
+    
+    ytyp=[]
+    i=0
+    while i < n:
+        ytyp.append(0.0)
+        j=0
+        while j < nperiod:
+            jbase=int(np.floor(period*j))
+            ytyp[i] += y[jbase+i]
+            j += 1
+        ytyp[i] /= nperiod
+        i += 1
+    return ytyp
 
 # Main program
 def main(argv):
@@ -127,7 +147,7 @@ def main(argv):
 
     filename=""
 
-    # Load the command-line arguments
+    # Load the command-line arguments:
     try:
         opts, args = getopt.getopt(argv,"f:")
     except getopt.GetoptError:
@@ -137,7 +157,7 @@ def main(argv):
         if opt in ("-f"):
             filename=arg
 
-    # Check that the file exists (and is not a directory)
+    # Check that the file exists (and is not a directory):
     if not (os.path.isfile(filename)):
         print "Error: the specified file \""+filename+ " \" does not exist"
         print usage
@@ -149,9 +169,11 @@ def main(argv):
     for row in csvReader:
         data.append(row)
 
-    # We take just the y-values from the input a.
+    # Consider only the stationary part of the data:
+    data=stationary_part(data)
+
+    # Put the y-values from the input data into y:
     y=y_part(data)
-    #print y
 
     # Remove the linear fit:
     ylin=linear_fit(y)
@@ -178,6 +200,7 @@ def main(argv):
         datawriter.writerow([i,yac[i]])
         i += 1
 
+    # The FFT of the autocorrelation:
     fac=np.fft.rfft(yac)
 
     # Output the FFT of the audotorrelation:
@@ -187,8 +210,20 @@ def main(argv):
         datawriter.writerow([i,abs(fac[i])])
         i += 1
 
-    print dominant_mode(fac)
+    # Find the (interpolated) dominant mode:
+    freq=dominant_mode(fac)
+    period=len(yac)/freq
+    print "Detected period: "+str(period)
 
+    # Determine the typical cycle:
+    ytyp=typical_period(period,y)
+
+    # Output the typical period:
+    datawriter = csv.writer(open("data.typ", 'wb'), delimiter='\t')
+    i=0
+    while i < len(ytyp):
+        datawriter.writerow([i,ytyp[i]])
+        i += 1
 
 # The main program is called from here
 if __name__ == "__main__":

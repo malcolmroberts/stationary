@@ -69,6 +69,13 @@ while(flag) {
 	yequals(0,grey);
 	yequals(-nf,grey);
       }
+
+      real period=570.393251702;//595.0344806;
+      int xeq=1;
+      while(xeq * period < max(x)) {
+	xequals(period*xeq,grey);
+	xeq += 1;
+      }
       
     }
   }

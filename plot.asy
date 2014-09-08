@@ -61,7 +61,7 @@ while(flag) {
       write();
 
       //-1.96/sqrt(length(x));
-      draw(graph(x,y),Pen(n),texify("data file"));
+      draw(graph(x,y,x<9017),Pen(n),texify("data file"));
 
       if(x95) {
 	// draw 95% confidence intervals
@@ -70,12 +70,21 @@ while(flag) {
 	yequals(-nf,grey);
       }
 
-      real period=570.393251702;//595.0344806;
+      /*
+      real period;
+      //period=570.393251702;//595.0344806;
+      period=566.502167343;
+      period=533.531741204;
+      period=575.541778777;
+      //period=559.023729726;
+      // period=555.052491453;
+      //period=568.750385788;
       int xeq=1;
       while(xeq * period < max(x)) {
 	xequals(period*xeq,grey);
 	xeq += 1;
       }
+      */
       
     }
   }

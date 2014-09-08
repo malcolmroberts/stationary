@@ -10,6 +10,7 @@ import os.path #for file-existence checking
 # stationary tail.
 def stationary_part(list):
     stable=list # TODO: actually do some tests here.
+    #stable=list[0:200]
     return stable
 
 # Return the list of values from a list of (t,value) pairs.
@@ -53,6 +54,7 @@ def autocorrelate(y):
     while i < len(y):
         ypad.append(y[i])
         i += 1
+    i=0
     while i < len(y):
         ypad.append(0.0)
         i += 1
@@ -62,8 +64,8 @@ def autocorrelate(y):
         Y[i] *= np.conj(Y[i])
         i += 1
     yac = np.fft.irfft(Y)
-    end=np.floor(len(yac)/2)
-    yac = yac[0:end]
+    yac = yac[0:len(y)]
+    print len(yac)
     return yac
 
 # Normalize an array by the value of the first element.
@@ -75,9 +77,13 @@ def normalize_by_first(y):
         i += 1
     return y
 
+# Return the square of the absolute value of the complex value z:
+def abs2(z):
+    return z.real*z.real + z.imag*z.imag
+
 # Return the absolute value of the complex value z: 
 def abs(z):
-    return np.sqrt(z.real*z.real + z.imag*z.imag)
+    return np.sqrt(abs2(z))
 
 # Return the max of the quadratic spline going through three equally
 # spaced points with y-values y0, y1, and y2.
@@ -86,41 +92,93 @@ def paramax(y0, y1, y2):
 
 # Return the index of the largest mode in a Fourier series Y, the
 # interpolate (using a quadratic approximation around the max) to find
-# the actual max.
-def dominant_mode(Y):
+# the actual frequency corresponding to the maximum.
+# Y is the FFT of the signal or its autocorrelation.
+def dominant_freq(Y):
     max=0.0
     i=0
     imax=0
+
     while i < len(Y):
         amp=abs(Y[i])
         if amp > max:
             max=amp
             imax=i
         i += 1
-    return imax+paramax(abs(Y[imax-1]),abs(Y[imax]),abs(Y[imax+1]))
-
-# Return the value of the quadratic spline at position x between
-# equally spaced points with input values y0, y1, and y2.
-def spline(x, y0, y1, y2):
-    x0=-1.0
-    x1=0.0
-    x2=1.0
-    L0=1.0
-
-    L0 *= (x-x1)/(x0-x1)
-    L0 *= (x-x2)/(x0-x2)
-
-    L1=1.0
-    L1 *= (x-x0)/(x1-x0)
-    L1 *= (x-x2)/(x1-x2)
     
-    L2=1.0
-    L1 *= (x-x0)/(x2-x0)
-    L0 *= (x-x1)/(x2-x1)
-  
-    return y0*L0 + y1*L1 + y2*L2
+    # Interpolate around the peak to see if there's a better max:
+    ishift=paramax(abs2(Y[imax-1]),abs2(Y[imax]),abs2(Y[imax+1]))
+    
+    # Add the interpolation result and return:
+    return imax+ishift
 
-def typical_period(period, y):
+# Return the dominant frequency using an iterative algorithm:
+# Y is the FFT of the signal or its autocorrelation.
+# n is the length of the original data.
+def detect_period(Y,n):
+    maxit=32
+    maxerr=1e-3
+    
+    # Set test-max to a very large value
+    err=sys.float_info.max
+    nfit0=0
+    # Initialize n
+    nfit=n
+
+    cont=True
+    i=0
+    while cont:
+        # Interpolated frequency:
+	freq=dominant_freq(Y[0:nfit])
+        # Length of period from interpolated frequency:
+        period=n/freq
+        # Number of interpolated periods that fit in data:
+        nperiod=int(np.floor(n/period))
+        # Max data size with an integral number of periods:
+        nfit=int(np.floor(nperiod*period))
+        # Difference between frequency and nearest integral mode:
+        err=np.abs(freq-np.round(freq))
+        
+        # Diagnostic output:
+        #print
+        #print "nfit="+str(nfit)
+        #print "nfit0="+str(nfit0)
+        #print "freq="+str(freq)
+        #print "period="+str(period)
+        #print "nperiod="+str(nperiod)
+        #print "err="+str(err)
+       
+        # Stop if the number of cycles that fits changes by less than
+        # 1 data point per iteration.
+        if (np.fabs(nfit-nfit0) < 1):
+            print "Finisehd after "+str(i)+" iterations: nfit="+str(nfit)+" is stable."
+            cont=False
+        nfit0=nfit
+        
+        # Stop if the frequency falls close to a Fourier mode.
+        if (err < maxerr):
+            print "Done: error is small: "+str(err)+"<"+str(maxerr)
+            cont=False
+
+        if (i > maxit):
+            print "Did "+str(i)+" iterations: stopping."
+            
+            print "nfit="+str(nfit)
+            print "nfit0="+str(nfit0)
+            print "freq="+str(freq)
+            print "period="+str(period)
+            print "nperiod="+str(nperiod)
+            print "err="+str(err)
+            cont=False
+
+        i += 1
+
+    return period
+
+# Return an array containing the typical cycle of the signal.
+# period is the period of the cycle.
+# y is the original signal
+def typical_cycle(period, y):
     # The length of the the output array is the floor of the period length:
     n=int(np.floor(period))
 
@@ -139,7 +197,47 @@ def typical_period(period, y):
             j += 1
         ytyp[i] /= nperiod
         i += 1
+        
+    error=0.0
+    i=0
+    while i < n:
+        j=0
+        while j < nperiod:
+            jbase=int(np.floor(period*j))
+            norm=np.fmax(np.fabs(ytyp[i]),np.fabs(y[jbase+i]))+1e-7
+            diff=(ytyp[i] - y[jbase+i])/norm
+            error +=  diff*diff
+            j += 1
+        i += 1
+    print "RMS error: "+str(np.sqrt(error/len(y)))
+
     return ytyp
+
+# Return and array containing the L2 distance between the typical
+# cycle and the actual data.
+# period is the period (not necessarily an integer)
+# data is the original data, in pairs
+# ytyp is an array containing the typical signal. 
+def typical_cycle_error(period,data,ytyp):
+    
+    typdiff=[]
+    i=0
+    while i < len(data):
+        typdiff.append([data[i][0],0])
+        i += 1
+
+    nperiod=int(np.floor(len(data)/period))
+    i=0
+    while i < len(ytyp):
+        j=0
+        while j < nperiod:
+            jbase=int(np.floor(period*j))
+            pos=jbase+i
+            diff=ytyp[i] - float(data[pos][1])
+            typdiff[pos][1] = diff
+            j += 1
+        i += 1
+    return typdiff
 
 # Main program
 def main(argv):
@@ -172,6 +270,8 @@ def main(argv):
     # Consider only the stationary part of the data:
     data=stationary_part(data)
 
+    print str(len(data))+" data points found"
+
     # Put the y-values from the input data into y:
     y=y_part(data)
 
@@ -186,7 +286,7 @@ def main(argv):
     datawriter = csv.writer(open("data", 'wb'), delimiter='\t')
     i=0
     while i < len(y):
-        datawriter.writerow([i,y[i]])
+        datawriter.writerow([data[i][0],y[i]])
         i += 1
 
     # Compute the autocorrelation and normalize:
@@ -211,12 +311,16 @@ def main(argv):
         i += 1
 
     # Find the (interpolated) dominant mode:
-    freq=dominant_mode(fac)
-    period=len(yac)/freq
+
+
+    #freq=dominant_freq_iter(fac,len(yac))
+    #freq=dominant_freq(fac)
+    #period=len(yac)/freq
+    period=detect_period(fac,len(yac))
     print "Detected period: "+str(period)
 
     # Determine the typical cycle:
-    ytyp=typical_period(period,y)
+    ytyp=typical_cycle(period,y)
 
     # Output the typical period:
     datawriter = csv.writer(open("data.typ", 'wb'), delimiter='\t')
@@ -224,6 +328,15 @@ def main(argv):
     while i < len(ytyp):
         datawriter.writerow([i,ytyp[i]])
         i += 1
+
+    # error output
+    typdiff=typical_cycle_error(period,data,ytyp)
+    datawriter = csv.writer(open("data.err", 'wb'), delimiter='\t')
+    i=0
+    while i < len(typdiff):
+        datawriter.writerow(typdiff[i])
+        i += 1
+    
 
 # The main program is called from here
 if __name__ == "__main__":

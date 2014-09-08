@@ -21,6 +21,31 @@ def y_part(list):
         i += 1
     return y
 
+# return an array containing the linear fit of the input array of
+# values y.
+def linear_fit(y):
+    A=0.0
+    B=0.0
+    C=0.0
+    D=0.0
+    i=0
+    while i < len(y):
+        A += i
+        B += y[i];
+        C += i*i;
+        D += i*y[i];
+        i += 1
+    m=(len(y)*D-A*B)/(len(y)*C-A*A);
+    c=(B-m*A)/len(y);
+    #print "m="+str(m)
+    #print "c="+str(c)
+    ylin=[]
+    i=0
+    while i < len(y):
+        ylin.append(m*i +c)
+        i += 1
+    return ylin
+
 # Return the autocorrelation of the array of reals y.
 def autocorrelate(y):
     ypad=[]
@@ -50,23 +75,30 @@ def normalize_by_first(y):
         i += 1
     return y
 
-# Return the index of the largest mode in a Fourier series Y.
+# Return the absolute value of the complex value z: 
+def abs(z):
+    return np.sqrt(z.real*z.real + z.imag*z.imag)
+
+
+# Return the max of the quadratic spline going through three equally
+# spaced points with y-values y0, y1, and y2.
+def paramax(y0, y1, y2):
+    return 0.5*(y0 - y2)/(y0 - 2*y1 +y2)
+
+# Return the index of the largest mode in a Fourier series Y, the
+# interpolate (using a quadratic approximation around the max) to find
+# the actual max.
 def dominant_mode(Y):
     max=0.0
     i=0
     imax=0
     while i < len(Y):
-        amp=Y[i].real*Y[i].real + Y[i].imag*Y[i].imag
+        amp=abs(Y[i])
         if amp > max:
             max=amp
             imax=i
         i += 1
-    return imax
-
-# Return the max of the quadratic spline going through three equally
-# spaced points with y-values y0, y1, and y2.
-def paramax(y0, y1, y2):
-    0.5*(y0 - y2)/(y0 - 2*y1 +y2)
+    return imax+paramax(abs(Y[imax-1]),abs(Y[imax]),abs(Y[imax+1]))
 
 # Return the value of the quadratic spline at position x between
 # equally spaced points with input values y0, y1, and y2.
@@ -87,6 +119,7 @@ def spline(x, y0, y1, y2):
     L0 *= (x-x1)/(x2-x1)
   
     return y0*L0 + y1*L1 + y2*L2
+
 
 # Main program
 def main(argv):
@@ -111,21 +144,49 @@ def main(argv):
         sys.exit(2)
     
     # Read the data
-    a = []
+    data = []
     csvReader = csv.reader(open(filename, 'rb'), delimiter='\t')
     for row in csvReader:
-        a.append(row)
-    
-    y=y_part(a)
-    # TODO: remove the linear fit (or just the mean?)
+        data.append(row)
+
+    # We take just the y-values from the input a.
+    y=y_part(data)
     #print y
+
+    # Remove the linear fit:
+    ylin=linear_fit(y)
+    i=0
+    while i < len(y):
+        y[i] -= ylin[i]
+        i += 1
+
+    # Output the data with linear regression removed:
+    datawriter = csv.writer(open("data", 'wb'), delimiter='\t')
+    i=0
+    while i < len(y):
+        datawriter.writerow([i,y[i]])
+        i += 1
+
+    # Compute the autocorrelation and normalize:
     yac=autocorrelate(y)
     yac=normalize_by_first(yac)
-    #print yac
+    
+    # Output the autocorrelation:
+    datawriter = csv.writer(open("data.ac", 'wb'), delimiter='\t')
+    i=0
+    while i < len(yac):
+        datawriter.writerow([i,yac[i]])
+        i += 1
 
     fac=np.fft.rfft(yac)
 
-    #print fac
+    # Output the FFT of the audotorrelation:
+    datawriter = csv.writer(open("data.fac", 'wb'), delimiter='\t')
+    i=0
+    while i < len(fac):
+        datawriter.writerow([i,abs(fac[i])])
+        i += 1
+
     print dominant_mode(fac)
 
 

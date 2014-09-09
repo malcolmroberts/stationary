@@ -65,7 +65,6 @@ def autocorrelate(y):
         i += 1
     yac = np.fft.irfft(Y)
     yac = yac[0:len(y)]
-    print len(yac)
     return yac
 
 # Normalize an array by the value of the first element.
@@ -209,7 +208,7 @@ def typical_cycle(period, y):
             error +=  diff*diff
             j += 1
         i += 1
-    print "RMS error: "+str(np.sqrt(error/len(y)))
+    print "RMS difference: "+str(np.sqrt(error/len(y)))
 
     return ytyp
 
@@ -311,9 +310,6 @@ def main(argv):
         i += 1
 
     # Find the (interpolated) dominant mode:
-
-
-    #freq=dominant_freq_iter(fac,len(yac))
     #freq=dominant_freq(fac)
     #period=len(yac)/freq
     period=detect_period(fac,len(yac))
@@ -321,17 +317,16 @@ def main(argv):
 
     # Determine the typical cycle:
     ytyp=typical_cycle(period,y)
-
-    # Output the typical period:
     datawriter = csv.writer(open("data.typ", 'wb'), delimiter='\t')
     i=0
     while i < len(ytyp):
         datawriter.writerow([i,ytyp[i]])
         i += 1
 
-    # error output
+    # Determine the part of the signal not represented by the detected
+    # cycle:
     typdiff=typical_cycle_error(period,data,ytyp)
-    datawriter = csv.writer(open("data.err", 'wb'), delimiter='\t')
+    datawriter = csv.writer(open("data.dif", 'wb'), delimiter='\t')
     i=0
     while i < len(typdiff):
         datawriter.writerow(typdiff[i])

@@ -16,7 +16,7 @@ def main(argv):
 
     infile=argv[0]
 
-    outfile=infile
+    outfile=infile+".out"
 
     if len(sys.argv) == 3 :
         outfile=argv[1]
@@ -41,7 +41,7 @@ def main(argv):
         i += 1
 
     # write the data out.
-    with open('test.csv', 'w') as fp:
+    with open(outfile, 'w') as fp:
         B = csv.writer(fp, delimiter='\t')
         B.writerows(b)
 

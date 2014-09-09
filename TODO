@@ -3,3 +3,7 @@ Normalise the phase of the typical cycle?
 Scriptify the generation of PDFs of outputs.
 
 Implement tests for statistical stationarity.
+
+Check for significance in autocorrelation when determining period.
+
+Check that there are at least 10 cycles when determining period.

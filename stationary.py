@@ -58,6 +58,7 @@ def autocorrelate(y):
     while i < len(y):
         ypad.append(0.0)
         i += 1
+    norm=1.0/len(y)
     Y=np.fft.rfft(ypad)
     i=0
     while i < len(Y):
@@ -65,6 +66,12 @@ def autocorrelate(y):
         i += 1
     yac = np.fft.irfft(Y)
     yac = yac[0:len(y)]
+    # Normalize by the length of the FFT to get the bare
+    # autocorrelation:
+    i=0
+    while i < len(yac):
+        yac[i] *= norm;
+        i += 1
     return yac
 
 # Normalize an array by the value of the first element.

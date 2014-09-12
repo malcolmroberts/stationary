@@ -111,31 +111,46 @@ def dominant_freq(Y):
             max=amp
             imax=i
         i += 1
-    
-    # Interpolate around the peak to see if there's a better max:
-    ishift=paramax(abs2(Y[imax-1]),abs2(Y[imax]),abs2(Y[imax+1]))
-    
-    # Add the interpolation result and return:
-    return imax+ishift
+
+    return imax
 
 # Return the dominant frequency using an iterative algorithm:
 # Y is the FFT of the signal or its autocorrelation.
 # n is the length of the original data.
 def detect_period(Y,n):
-    maxit=32
-    maxerr=1e-3
+    maxit=32 # Maximum number of iterations
+    maxerr=1e-3 # Tolerance for the difference between the detected
+                # mode and the nearest mode on the grid.
     
-    # Set test-max to a very large value
+    # Set test-max to a very large value initially
     err=sys.float_info.max
-    nfit0=0
     # Initialize n
     nfit=n
+    # nfit0 is used to see if nfit is stable from iteration to
+    # iteration.
+    nfit0=0
 
     cont=True
     i=0
     while cont:
+        # Mode (on the grid) with max frequency:
+        freq_i=dominant_freq(Y[0:nfit])
+        # Interpolate around the peak to see if there's a better max:
+        ishift=paramax(abs2(Y[freq_i-1]),abs2(Y[freq_i]),abs2(Y[freq_i+1]))
         # Interpolated frequency:
-	freq=dominant_freq(Y[0:nfit])
+	freq=freq_i + ishift
+
+        # Amplitude of dominant mode of the autocorrelation:
+        amp=abs(Y[freq_i])/len(Y)
+        #print "amplitude="+str(amp)
+        # Confidence interval:
+        nf=1.96/np.sqrt(n);
+        #print "Confidend interval: "+str(nf)
+
+        # check whether the amplitude is above the confidence interval:
+        if amp < nf:
+            return 1
+
         # Length of period from interpolated frequency:
         period=n/freq
         # Number of interpolated periods that fit in data:

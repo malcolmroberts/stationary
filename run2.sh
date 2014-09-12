@@ -28,8 +28,11 @@ if [ "$1" != "" ]; then
     cd tex
     latexmk -pdf transforms
     cd -
+    
+    outfile=$(echo $1 | sed 's/dinputs//'| sed 's/cinputs//')
 
-    #cp tex/transforms.pdf dinputs/xcorr_pdfs/$1.pdf
+    echo $outfile
+    cp tex/transforms.pdf dinputs/xcorr_pdfs/$outfile.pdf
 
     echo $1
 

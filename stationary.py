@@ -315,6 +315,11 @@ def main(argv):
     period=detect_period(fac,len(yac))
     print "Detected period: "+str(period)
 
+    # Write the period length to a file for use with latex.
+    f = open('tex/def_period.tex', 'w')
+    f.write("\def\periodlength{"+str(period)+"}")
+    f.close();
+
     # Determine the typical cycle:
     ytyp=typical_cycle(period,y)
     datawriter = csv.writer(open("data.typ", 'wb'), delimiter='\t')

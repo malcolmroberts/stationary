@@ -9,7 +9,7 @@
 \definecolor{heavyblue}{cmyk}{1,1,0,0.25}
 
 \usepackage{geometry}
-\geometry{a4paper,margin=0cm}
+\geometry{a4paper,margin=4cm}
 
 
 \newcommand{\thetitle}{Some figures from transforms for signal
@@ -51,6 +51,7 @@
 %\def\aval{500}
 \input{def_b.tex}
 %\def\bval{500}
+\input{def_period.tex}
 
 %\section{Introduction}
 
@@ -58,7 +59,7 @@
   \begin{center}        
     \includegraphics[width=0.4\textwidth]{../data}
     \caption{Input signal from \texttt{\filename} with typical cycle
-      in blue.}
+      in blue. The detected period length is \periodlength{}.}
   \end{center}
 \end{figure}
 

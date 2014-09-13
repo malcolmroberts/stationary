@@ -46,13 +46,15 @@ while(flag) {
     file fin=input(filename).line();
     
     real[][] a=fin.dimension(0,0);
-    
+
+    write(a[0].length);
+
     a=transpose(a);
     real[] x=a[0];
     real[] y=a[1];
 
     real xmin=min(x);
-    write(xmin);
+    //write(xmin);
     
     if(logscale) {
       draw(graph(x,y,x>0),Pen(n),texify("data file"));

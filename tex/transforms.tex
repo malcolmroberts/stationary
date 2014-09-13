@@ -9,7 +9,7 @@
 \definecolor{heavyblue}{cmyk}{1,1,0,0.25}
 
 \usepackage{geometry}
-\geometry{a4paper,margin=4cm}
+\geometry{a4paper,margin=1cm}
 
 
 \newcommand{\thetitle}{Some figures from transforms for signal
@@ -39,9 +39,7 @@
 \begin{document}
 
 \begin{center}
-  \thetitle{}\\
-  \today.\\
-  \theauthor{}
+  \thetitle{}, \today, \theauthor{}
 \end{center}
 
 \input{defrun.tex}
@@ -57,15 +55,14 @@
 
 \begin{figure}[htbp]
   \begin{center}        
-    \includegraphics[width=0.4\textwidth]{../data}
-    \caption{Input signal from \texttt{\filename} with typical cycle
-      in blue. The detected period length is \periodlength{}.}
+    \includegraphics{../data}
+    \caption{\texttt{\filename} with linear regression removed.}
   \end{center}
 \end{figure}
 
 \begin{figure}[htbp]
   \begin{center}        
-    \includegraphics[width=0.4\textwidth]{../data_ac}
+    \includegraphics{../data_ac}
     \caption{Autocorrelation.}
     %\caption{Input signal from \aval{} to \bval{} with linear}
   \end{center}
@@ -73,9 +70,16 @@
 
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[width=0.4\textwidth]{../data_fac}
+    \includegraphics{../data_fac}
     \caption{FFT of autocorrelation.}
     %\caption{Input signal from \aval{} to \bval{} with linear}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}        
+    \includegraphics{../data_typ}
+    \caption{Detected typical cycles with periods in \periodlength{}.}
   \end{center}
 \end{figure}
 

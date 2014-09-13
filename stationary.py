@@ -256,6 +256,16 @@ def rm_typical_cycle(period,y,ytyp):
     return newy
 
 
+# write the y-values to a an output file in (t,val) pairs.
+def write_y_to_file(y,filename):
+    f=open(filename, 'wb')
+    datawriter = csv.writer(f, delimiter='\t')
+    i=0
+    while i < len(y):
+        datawriter.writerow([i,y[i]])
+        i += 1
+    f.close()
+
 # Return and array containing the L2 distance between the typical
 # cycle and the actual data.
 # Input:
@@ -325,34 +335,16 @@ def main(argv):
     while i < len(y):
         y[i] -= ylin[i]
         i += 1
-
-    # Output the data with linear regression removed:
-    datawriter = csv.writer(open("data", 'wb'), delimiter='\t')
-    i=0
-    while i < len(y):
-        datawriter.writerow([data[i][0],y[i]])
-        i += 1
+    write_y_to_file(y,"data")
 
     # Compute the autocorrelation and normalize
     yac=autocorrelate(y)
     yac=normalize_by_first(yac)
-    
-    # Output the autocorrelation to disk
-    datawriter = csv.writer(open("data.ac", 'wb'), delimiter='\t')
-    i=0
-    while i < len(yac):
-        datawriter.writerow([i,yac[i]])
-        i += 1
+    write_y_to_file(yac,"data.ac")
 
     # The FFT of the autocorrelation
     fac=np.fft.rfft(yac)
-
-    # Output the FFT of the audotorrelation to disk
-    datawriter = csv.writer(open("data.fac", 'wb'), delimiter='\t')
-    i=0
-    while i < len(fac):
-        datawriter.writerow([i,abs(fac[i])])
-        i += 1
+    write_y_to_file(yac,"data.fac")
 
     # Find the (interpolated) dominant mode
     #freq=dominant_freq(fac)
@@ -370,46 +362,33 @@ def main(argv):
             print y[0]
             ytyp=typical_cycle(p,y)
             y=rm_typical_cycle(p,y,ytyp)
-            
+            write_y_to_file(ytyp,"data.ytyp"+str(len(period)))
         else:
             findperiod=False
         #if(len(period) > 1):
         #    findperiod=False
-
-    if True:
-        datawriter = csv.writer(open("data.nac", 'wb'), delimiter='\t')
-        print "asdf"
-        print len(y)
-        i=0
-        while i < len(y):
-            datawriter.writerow([i,y[i]])
-            i += 1
-            
-
     print "Detected period: "+str(period)
+
+    # The data which is not periodic:
+    write_y_to_file(y,"data.nac")
 
     # Write the period length to a file for use with latex.
     f = open('tex/def_period.tex', 'w')
     f.write("\def\periodlength{"+str(period)+"}")
     f.close();
+    # Write number of periods to file
+    f = open('nperiods', 'w')
+    f.write(str(len(period)))
+    f.close();
 
     # Determine the typical cycle:
     ytyp=typical_cycle(period[0],y)
-    datawriter = csv.writer(open("data.typ", 'wb'), delimiter='\t')
-    i=0
-    while i < len(ytyp):
-        datawriter.writerow([i,ytyp[i]])
-        i += 1
+    write_y_to_file(ytyp,"data.typ")
 
     # Determine the part of the signal not represented by the detected
     # cycle:
     typdiff=typical_cycle_error(period[0],data,ytyp)
-    datawriter = csv.writer(open("data.dif", 'wb'), delimiter='\t')
-    i=0
-    while i < len(typdiff):
-        datawriter.writerow(typdiff[i])
-        i += 1
-    
+    write_y_to_file(typdiff,"data.dif")    
 
 # The main program is called from here
 if __name__ == "__main__":

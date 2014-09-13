@@ -11,11 +11,19 @@ echo "Running " $1
 
 ./change_format.py $1 cfile
 
+rm -f data.ytyp*
+
 ./stationary.py -f cfile
 
 # original file minus linear term, and add the typical cycle
 asy -f pdf plot.asy  -u "filenames=\"data,data.typ\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
 mv plot.pdf data.pdf
+
+# find all the typical run files, turn newlines into commas, remove
+# last comma.
+TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
+asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+mv plot.pdf data_typ.pdf
 
 # autocorrelation
 asy -f pdf plot.asy  -u "filenames=\"data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\""

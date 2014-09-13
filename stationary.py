@@ -6,14 +6,14 @@ import sys # to check for file existence, etc.
 import getopt # to pass command-line arguments
 import os.path #for file-existence checking
 
-# Do stationarity tests on a list or (t,value) pairs and return the
+# Do stationarity tests on a list or (time,value) pairs and return the
 # stationary tail.
 def stationary_part(list):
     stable=list # TODO: actually do some tests here.
     #stable=list[0:200]
     return stable
 
-# Return the list of values from a list of (t,value) pairs.
+# Return the list of values from a list of (time,value) pairs.
 def y_part(list):
     y=[]
     i=0
@@ -22,7 +22,7 @@ def y_part(list):
         i += 1
     return y
 
-# return an array containing the linear fit of the input array of
+# Return an array containing the linear fit of the input array of
 # values y.
 def linear_fit(y):
     A=0.0
@@ -142,10 +142,10 @@ def detect_period(Y,n):
 
         # Amplitude of dominant mode of the autocorrelation:
         amp=abs(Y[freq_i])/len(Y)
-        #print "amplitude="+str(amp)
+        print "amplitude="+str(amp)
         # Confidence interval:
         nf=1.96/np.sqrt(n);
-        #print "Confidend interval: "+str(nf)
+        print "Confidence interval: "+str(nf)
 
         # check whether the amplitude is above the confidence interval:
         if amp < nf:
@@ -172,7 +172,8 @@ def detect_period(Y,n):
         # Stop if the number of cycles that fits changes by less than
         # 1 data point per iteration.
         if (np.fabs(nfit-nfit0) < 1):
-            print "Finisehd after "+str(i)+" iterations: nfit="+str(nfit)+" is stable."
+            print ("Finisehd after "+str(i)+" iterations: nfit="
+                   + str(nfit)+" is stable.")
             cont=False
         nfit0=nfit
         
@@ -234,19 +235,40 @@ def typical_cycle(period, y):
 
     return ytyp
 
+# FIXME: add documentation
+def rm_typical_cycle(period,y,ytyp):
+    newy=[]
+    i=0
+    while i < len(y):
+        newy.append(y[i])
+        i += 1
+    nperiod=int(np.floor(len(y)/period))
+    i=0
+    while i < len(ytyp):
+        j=0
+        while j < nperiod:
+            jbase=int(np.floor(period*j))
+            pos=jbase+i
+            diff=ytyp[i] - float(y[pos])
+            newy[pos] = diff
+            j += 1
+        i += 1
+    return newy
+
+
 # Return and array containing the L2 distance between the typical
 # cycle and the actual data.
+# Input:
 # period is the period (not necessarily an integer)
-# data is the original data, in pairs
+# data is the original data, in (time,value) pairs
+# Output:
 # ytyp is an array containing the typical signal. 
 def typical_cycle_error(period,data,ytyp):
-    
     typdiff=[]
     i=0
     while i < len(data):
         typdiff.append([data[i][0],0])
         i += 1
-
     nperiod=int(np.floor(len(data)/period))
     i=0
     while i < len(ytyp):
@@ -264,9 +286,11 @@ def typical_cycle_error(period,data,ytyp):
 def main(argv):
     usage="./stationary -f <filename>"
 
+    # Filename for the input data (consisting of tab-separated
+    # (time,value) pairs.
     filename=""
 
-    # Load the command-line arguments:
+    # Load the command-line arguments
     try:
         opts, args = getopt.getopt(argv,"f:")
     except getopt.GetoptError:
@@ -287,11 +311,10 @@ def main(argv):
     csvReader = csv.reader(open(filename, 'rb'), delimiter='\t')
     for row in csvReader:
         data.append(row)
+    print str(len(data))+" data points found"
 
     # Consider only the stationary part of the data:
     data=stationary_part(data)
-
-    print str(len(data))+" data points found"
 
     # Put the y-values from the input data into y:
     y=y_part(data)
@@ -310,31 +333,59 @@ def main(argv):
         datawriter.writerow([data[i][0],y[i]])
         i += 1
 
-    # Compute the autocorrelation and normalize:
+    # Compute the autocorrelation and normalize
     yac=autocorrelate(y)
     yac=normalize_by_first(yac)
     
-    # Output the autocorrelation:
+    # Output the autocorrelation to disk
     datawriter = csv.writer(open("data.ac", 'wb'), delimiter='\t')
     i=0
     while i < len(yac):
         datawriter.writerow([i,yac[i]])
         i += 1
 
-    # The FFT of the autocorrelation:
+    # The FFT of the autocorrelation
     fac=np.fft.rfft(yac)
 
-    # Output the FFT of the audotorrelation:
+    # Output the FFT of the audotorrelation to disk
     datawriter = csv.writer(open("data.fac", 'wb'), delimiter='\t')
     i=0
     while i < len(fac):
         datawriter.writerow([i,abs(fac[i])])
         i += 1
 
-    # Find the (interpolated) dominant mode:
+    # Find the (interpolated) dominant mode
     #freq=dominant_freq(fac)
     #period=len(yac)/freq
-    period=detect_period(fac,len(yac))
+    period=[]
+    findperiod=True
+    while(findperiod):
+        fac=autocorrelate(y)
+        yac=normalize_by_first(fac)
+        fac=np.fft.rfft(yac)
+        p=detect_period(fac,len(yac))
+        period.append(p)
+        if p > 1:
+            print p
+            print y[0]
+            ytyp=typical_cycle(p,y)
+            y=rm_typical_cycle(p,y,ytyp)
+            
+        else:
+            findperiod=False
+        #if(len(period) > 1):
+        #    findperiod=False
+
+    if True:
+        datawriter = csv.writer(open("data.nac", 'wb'), delimiter='\t')
+        print "asdf"
+        print len(y)
+        i=0
+        while i < len(y):
+            datawriter.writerow([i,y[i]])
+            i += 1
+            
+
     print "Detected period: "+str(period)
 
     # Write the period length to a file for use with latex.
@@ -343,7 +394,7 @@ def main(argv):
     f.close();
 
     # Determine the typical cycle:
-    ytyp=typical_cycle(period,y)
+    ytyp=typical_cycle(period[0],y)
     datawriter = csv.writer(open("data.typ", 'wb'), delimiter='\t')
     i=0
     while i < len(ytyp):
@@ -352,7 +403,7 @@ def main(argv):
 
     # Determine the part of the signal not represented by the detected
     # cycle:
-    typdiff=typical_cycle_error(period,data,ytyp)
+    typdiff=typical_cycle_error(period[0],data,ytyp)
     datawriter = csv.writer(open("data.dif", 'wb'), delimiter='\t')
     i=0
     while i < len(typdiff):

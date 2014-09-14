@@ -24,15 +24,23 @@ if [ "$1" != "" ]; then
     else
 	echo "\def\bval{end}" > tex/def_b.tex
     fi
-
+    
+    nperiods=$(cat nperiods)
+    
     cd tex
-    latexmk -pdf transforms
+    if [ $nperiods != "1" ]; then
+	latexmk -pdf transforms
+    else
+	latexmk -pdf transforms_np
+	mv transforms_np.pdf transforms.pdf
+    fi
     cd -
     
     outfile=$(echo $1 | sed 's/dinputs//'| sed 's/cinputs//')
 
     echo $outfile
-    cp tex/transforms.pdf dinputs/xcorr_pdfs/$outfile.pdf
+    mkdir -p cinputs/xcorr_pdfs
+    cp tex/transforms.pdf cinputs/xcorr_pdfs/$outfile.pdf
 
     echo $1
 

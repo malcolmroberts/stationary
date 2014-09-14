@@ -77,10 +77,11 @@ def autocorrelate(y):
 # Normalize an array by the value of the first element.
 def normalize_by_first(y):
     norm=y[0]
-    i=0
-    while i < len(y):
-        y[i] /= norm
-        i += 1
+    if(np.abs(norm) > 0.0):
+        i=0
+        while i < len(y):
+            y[i] /= norm
+            i += 1
     return y
 
 # Return the square of the absolute value of the complex value z:
@@ -94,7 +95,9 @@ def abs(z):
 # Return the max of the quadratic spline going through three equally
 # spaced points with y-values y0, y1, and y2.
 def paramax(y0, y1, y2):
-    return 0.5*(y0 - y2)/(y0 - 2*y1 +y2)
+    if(np.abs(y0) > 0 and np.abs(y1) > 0 and np.abs(y2) > 0): 
+        return 0.5*(y0 - y2)/(y0 - 2*y1 +y2)
+    return 0
 
 # Return the index of the largest mode in a Fourier series Y, the
 # interpolate (using a quadratic approximation around the max) to find
@@ -134,7 +137,10 @@ def detect_period(Y,n):
     i=0
     while cont:
         # Mode (on the grid) with max frequency:
-        freq_i=dominant_freq(Y[0:nfit])
+        freq_i=dominant_freq(Y[0:int(np.floor(nfit/2))])
+        #print freq_i
+        #print len(Y)
+
         # Interpolate around the peak to see if there's a better max:
         ishift=paramax(abs2(Y[freq_i-1]),abs2(Y[freq_i]),abs2(Y[freq_i+1]))
         # Interpolated frequency:
@@ -142,10 +148,10 @@ def detect_period(Y,n):
 
         # Amplitude of dominant mode of the autocorrelation:
         amp=abs(Y[freq_i])/len(Y)
-        print "amplitude="+str(amp)
+        #print "amplitude="+str(amp)
         # Confidence interval:
         nf=1.96/np.sqrt(n);
-        print "Confidence interval: "+str(nf)
+        #print "Confidence interval: "+str(nf)
 
         # check whether the amplitude is above the confidence interval:
         if amp < nf:
@@ -156,7 +162,7 @@ def detect_period(Y,n):
         # Number of interpolated periods that fit in data:
         nperiod=int(np.floor(n/period))
         # Max data size with an integral number of periods:
-        nfit=int(np.floor(nperiod*period))
+        nfit=int(np.floor(nperiod*period)/2)
         # Difference between frequency and nearest integral mode:
         err=np.abs(freq-np.round(freq))
         
@@ -172,25 +178,25 @@ def detect_period(Y,n):
         # Stop if the number of cycles that fits changes by less than
         # 1 data point per iteration.
         if (np.fabs(nfit-nfit0) < 1):
-            print ("Finisehd after "+str(i)+" iterations: nfit="
-                   + str(nfit)+" is stable.")
+            #print ("Finisehd after "+str(i)+" iterations: nfit="
+            #       + str(nfit)+" is stable.")
             cont=False
         nfit0=nfit
         
         # Stop if the frequency falls close to a Fourier mode.
         if (err < maxerr):
-            print "Done: error is small: "+str(err)+"<"+str(maxerr)
+            #print "Done: error is small: "+str(err)+"<"+str(maxerr)
             cont=False
 
         if (i > maxit):
-            print "Did "+str(i)+" iterations: stopping."
+            #print "Did "+str(i)+" iterations: stopping."
             
-            print "nfit="+str(nfit)
-            print "nfit0="+str(nfit0)
-            print "freq="+str(freq)
-            print "period="+str(period)
-            print "nperiod="+str(nperiod)
-            print "err="+str(err)
+            #print "nfit="+str(nfit)
+            #print "nfit0="+str(nfit0)
+            #print "freq="+str(freq)
+            #print "period="+str(period)
+            #print "nperiod="+str(nperiod)
+            #print "err="+str(err)
             cont=False
 
         i += 1
@@ -206,7 +212,7 @@ def typical_cycle(period, y):
 
     # Number of periods in y:
     nperiod=int(np.floor(len(y)/period))
-    print "There were "+str(nperiod)+" period(s) found in the data."
+    #print "There were "+str(nperiod)+" period(s) found in the data."
     
     ytyp=[]
     i=0
@@ -231,7 +237,7 @@ def typical_cycle(period, y):
             error +=  diff*diff
             j += 1
         i += 1
-    print "RMS difference: "+str(np.sqrt(error/len(y)))
+    #print "RMS difference: "+str(np.sqrt(error/len(y)))
 
     return ytyp
 
@@ -263,6 +269,16 @@ def write_y_to_file(y,filename):
     i=0
     while i < len(y):
         datawriter.writerow([i,y[i]])
+        i += 1
+    f.close()
+
+# write the y-values to a an output file in (t,val) pairs.
+def write_abs_y_to_file(Y,filename):
+    f=open(filename, 'wb')
+    datawriter = csv.writer(f, delimiter='\t')
+    i=0
+    while i < len(Y):
+        datawriter.writerow([i,np.abs(Y[i])])
         i += 1
     f.close()
 
@@ -344,11 +360,11 @@ def main(argv):
 
     # The FFT of the autocorrelation
     fac=np.fft.rfft(yac)
-    write_y_to_file(yac,"data.fac")
+    write_abs_y_to_file(fac,"data.fac")
 
     # Find the (interpolated) dominant mode
     #freq=dominant_freq(fac)
-    #period=len(yac)/freq
+    #period=len(ytypac)/freq
     period=[]
     findperiod=True
     while(findperiod):
@@ -356,10 +372,25 @@ def main(argv):
         yac=normalize_by_first(fac)
         fac=np.fft.rfft(yac)
         p=detect_period(fac,len(yac))
+
+        # Must have 10 cycles in the data.
+        if p > len(yac)/10:
+            p=1
+
+        # FIXME: temp?
+        p=np.round(p)
+
+        # don't repeat periods
+        i=0
+        while (i < len(period)):
+            if p == period[i]:
+                p=1
+            i += 1
+
         period.append(p)
         if p > 1:
-            print p
-            print y[0]
+            #print p
+            #print y[0]
             ytyp=typical_cycle(p,y)
             y=rm_typical_cycle(p,y,ytyp)
             write_y_to_file(ytyp,"data.ytyp"+str(len(period)))
@@ -367,6 +398,12 @@ def main(argv):
             findperiod=False
         #if(len(period) > 1):
         #    findperiod=False
+
+
+        # And stop looping if we get more than 10 (we're probably stuck...)
+        if len(period) > 10:
+            findperiod=False
+
     print "Detected period: "+str(period)
 
     # The data which is not periodic:
@@ -382,13 +419,13 @@ def main(argv):
     f.close();
 
     # Determine the typical cycle:
-    ytyp=typical_cycle(period[0],y)
-    write_y_to_file(ytyp,"data.typ")
+    #ytyp=typical_cycle(period[0],y)
+    #write_y_to_file(ytyp,"data.typ")
 
     # Determine the part of the signal not represented by the detected
     # cycle:
-    typdiff=typical_cycle_error(period[0],data,ytyp)
-    write_y_to_file(typdiff,"data.dif")    
+    #typdiff=typical_cycle_error(period[0],data,ytyp)
+    #write_y_to_file(typdiff,"data.dif")    
 
 # The main program is called from here
 if __name__ == "__main__":

@@ -1,0 +1,84 @@
+\documentclass[a4paper]{article}
+\usepackage{amsmath}
+\usepackage{breqn}
+\usepackage{mathdef}
+\usepackage{hyperref}
+\usepackage{datetime}
+\usepackage{natbib}
+
+\definecolor{heavyblue}{cmyk}{1,1,0,0.25}
+
+\usepackage{geometry}
+\geometry{a4paper,margin=1cm}
+
+
+\newcommand{\thetitle}{Some figures from transforms for signal
+  detection in Agent-Based Models}
+
+\newcommand{\theauthor}{Malcolm Roberts}
+
+\hypersetup{
+  pdftitle={\thetitle},
+  pdfpagemode=UseOutlines,
+  citebordercolor=0 0 1,
+  colorlinks=true,
+  allcolors=heavyblue,
+  breaklinks=true,
+  pdfauthor={\theauthor},
+  pdfpagetransition=Dissolve,
+  bookmarks=true
+}
+
+% Specify ISO date format:
+\yyyymmdddate
+\renewcommand{\dateseparator}{-}
+
+\newcommand{\no}[1]{\hiderel{#1}}
+
+
+\begin{document}
+
+\begin{center}
+  \thetitle{}, \today, \theauthor{}
+\end{center}
+
+\input{defrun.tex}
+%\def\filename{perfectsine}
+
+\input{def_a.tex}
+%\def\aval{500}
+\input{def_b.tex}
+%\def\bval{500}
+\input{def_period.tex}
+
+%\section{Introduction}
+
+\begin{figure}[htbp]
+  \begin{center}        
+    \includegraphics{../data}
+    \caption{\texttt{\filename} with linear regression removed.}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}        
+    \includegraphics{../data_ac}
+    \caption{Autocorrelation.}
+    %\caption{Input signal from \aval{} to \bval{} with linear}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics{../data_fac}
+    \caption{FFT of autocorrelation.}
+    %\caption{Input signal from \aval{} to \bval{} with linear}
+  \end{center}
+\end{figure}
+
+\begin{center}        
+  No periods detected.
+\end{center}
+
+\end{document}
+

@@ -49,7 +49,7 @@ void calc_opt_Cycle ();
   
   //Used by the preTest_onTheRun and *_offTheRun
   int SPE_CurrentTestWindowSize, SPE_preTestStart, SPE_NextTestTime, SPE_TempTailStart, SPE_TempCycleLength, SPE_TempTailEnd, SPE_AvgCycle_Phase_start, SPE_MaxCycleLength;
-  double SPE_CurrentMeanDelta, SPE_CurrentVarDelta, SPE_FrameASum, SPE_FrameBSum, SPE_Wilcoxon, SPE_Wilcoxon_zVal, SPE_Gamma, SPE_relativeMSE;
+  double SPE_CurrentMeanDelta, SPE_CurrentVarDelta, SPE_FrameASum, SPE_FrameBSum, SPE_Wilcoxon, SPE_Wilcoxon_zVal, SPE_Gamma, SPE_relativeMSE, SPE_MSE;
   double SPE_Data[SPE_MaximumNumberOfSteps+1],SPE_AvgCycle[SPE_MaximumNumberOfSteps+1],SPE_AvgCycle_StdDev[SPE_MaximumNumberOfSteps+1], SPE_ACF[SPE_MaximumNumberOfSteps+1], SPE_MSER[SPE_MaximumNumberOfSteps+1],SPE_Residual[SPE_MaximumNumberOfSteps+1];
   bool SPE_PreTestDue, SPE_TestOK;
   void init_TestVariables(){
@@ -711,6 +711,10 @@ bool Tail_is_stationary_Res (double Data_Input[], int Tail_start, int Tail_end, 
  
  sprintf(PLOGTXT,"!!!!:\tChecking for stationarity at time %i.Wilcoxon is %15.f and z-level is %15.f. Ranks were %i",Tail_end,SPE_Wilcoxon,SPE_Wilcoxon_zVal,signed_ranks);
  WriteToLog(PLOGTXT,Tail_end);
+ 
+ SPE_MSE = calc_MSE_AvgCycle(Data_input, Tail_start, Tail_end, AvgCycle_Input, Phase_start, Cyclelength);
+ 
+ SPE_Gamma = calc_gamma_corr(Data_input, Tail_start, Tail_end, AvgCycle_Input, Phase_start, Cyclelength);
  
  return  SPE_Wilcoxon_zVal>SPE_Wilcoxon_Critical_zValue;
 

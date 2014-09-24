@@ -1,10 +1,17 @@
 #!/bin/bash
 
-# A simple bash script to plot 
+# A simple bash script to generate output from stationary.py
+# usage:
+# ./run.sh <filename> <bool for whether to round or not>
 
 if [ "$1" == "" ]; then
     echo "Gotta specify a file!"
     exit
+fi
+
+rstring=""
+if [ "$2" != "" ]; then
+    rstring="-r "$2
 fi
 
 echo "Running " $1
@@ -13,7 +20,7 @@ echo "Running " $1
 
 rm -f data.ytyp*
 
-./stationary.py -f cfile
+./stationary.py -f cfile $rstring
 
 # original file minus linear term, and add the typical cycle
 asy -f pdf plot.asy  -u "filenames=\"data,data.typ\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""

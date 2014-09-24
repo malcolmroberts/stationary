@@ -1,17 +1,17 @@
 #!/bin/bash
 
-a_arg=""
+# run ./run.sh and make the associated latex file.
+# usage: 
+# ./run2.sh <input filename> <bool for whether to round or not>
+
+rstring=""
 if [ "$2" != "" ]; then
-    a_arg="$2"
-fi
-b_arg=""
-if [ "$3" != "" ]; then
-    b_arg="$3"
+    rstring=$2
 fi
 
 if [ "$1" != "" ]; then
 
-    ./run.sh $1 $a_arg $b_arg
+    ./run.sh $1 $2
 
     echo "\def\filename{$1}" > tex/defrun.tex
     if [ "$2" != "" ]; then

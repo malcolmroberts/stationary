@@ -142,12 +142,12 @@ def detect_period(Y,n):
         #print len(Y)
 
         # Interpolate around the peak to see if there's a better max:
-        ishift=paramax(abs2(Y[freq_i-1]),abs2(Y[freq_i]),abs2(Y[freq_i+1]))
+        ishift=paramax(abs(Y[freq_i-1]),abs(Y[freq_i]),abs(Y[freq_i+1]))
         # Interpolated frequency:
 	freq=freq_i + ishift
 
         # Amplitude of dominant mode of the autocorrelation:
-        amp=abs(Y[freq_i])/len(Y)
+        amp=abs(Y[freq_i])
         #print "amplitude="+str(amp)
         # Confidence interval:
         nf=1.96/np.sqrt(n);
@@ -155,6 +155,7 @@ def detect_period(Y,n):
 
         # check whether the amplitude is above the confidence interval:
         if amp < nf:
+            print "amp too small"
             return 1
 
         # Length of period from interpolated frequency:
@@ -162,7 +163,8 @@ def detect_period(Y,n):
         # Number of interpolated periods that fit in data:
         nperiod=int(np.floor(n/period))
         # Max data size with an integral number of periods:
-        nfit=int(np.floor(nperiod*period)/2)
+        #nfit=int(np.floor(nperiod*period)/2)
+        nfit=int(np.floor(nperiod*period))
         # Difference between frequency and nearest integral mode:
         err=np.abs(freq-np.round(freq))
         
@@ -316,15 +318,19 @@ def main(argv):
     # (time,value) pairs.
     filename=""
 
+    round=False
+
     # Load the command-line arguments
     try:
-        opts, args = getopt.getopt(argv,"f:")
+        opts, args = getopt.getopt(argv,"f:r:")
     except getopt.GetoptError:
         print usage
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-f"):
             filename=arg
+        if opt in ("-r"):
+            round=(arg == "True" or arg == "true" or arg == "1")
 
     # Check that the file exists (and is not a directory):
     if not (os.path.isfile(filename)):
@@ -377,8 +383,8 @@ def main(argv):
         if p > len(yac)/10:
             p=1
 
-        # FIXME: temp?
-        p=np.round(p)
+        if(round):
+            p=np.round(p)
 
         # don't repeat periods
         i=0

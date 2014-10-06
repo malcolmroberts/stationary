@@ -1,0 +1,15 @@
+*~
+*.log
+*.out
+data.ytyp*
+*.csv
+nperiods
+tex/*fdb_latexmk
+tex/*.aux
+tex/*.fls
+*.pdf
+*.eps
+tex/def_a.tex
+tex/def_b.tex
+tex/def_period.tex
+tex/defrun.tex

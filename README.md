@@ -28,7 +28,7 @@ stationary.py currently produces a variety of files:
 * data.fac, which is the magnituded of the modes of the DFT of the
   autocorrelation,
 
-* data.typ, which is the typical cycle detected, and
+* data.typ<#>, which are the typical cycles detected (<#> an ineger >= 0).
 
 * data.dif, which is the difference between the signal (with the
   linear regression already removed) and the signal as represented by
@@ -48,3 +48,15 @@ command
 The script then asks for the filenames, which is a comma-separated
 list of filenames (eg "data,data.typ", without the quotes), and then
 asks for a choice of scales and axis labels.
+
+
+Scripts:
+The file
+  run.sh <filename> <optional bool to specify rounding>
+take an input file <filename> and convert it into a sequence of
+(position,value) pairs, and then run stationary.py
+
+The file
+  run2.sh <filename> <optional bool to specify rounding>
+calls run.sh and then creates a PDF of the output, using asymptote and
+tex for visualization and typesetting.

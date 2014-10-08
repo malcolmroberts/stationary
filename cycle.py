@@ -1,6 +1,32 @@
 import numpy as np # numerical methods such as FFTs.
 import sys # to check for file existence, etc.
 
+# Return an array containing the linear fit of the input array of
+# values y.
+def linear_fit(y):
+    A=0.0
+    B=0.0
+    C=0.0
+    D=0.0
+    i=0
+    while i < len(y):
+        A += i
+        B += y[i];
+        C += i*i;
+        D += i*y[i];
+        i += 1
+    m=(len(y)*D-A*B)/(len(y)*C-A*A);
+    c=(B-m*A)/len(y);
+    #print "m="+str(m)
+    #print "c="+str(c)
+    ylin=[]
+    i=0
+    while i < len(y):
+        ylin.append(m*i +c)
+        i += 1
+    return ylin
+
+
 # Return the autocorrelation of the array of reals y.
 def autocorrelate(y):
     ypad=[]
@@ -62,8 +88,6 @@ def dominant_freq(Y):
         i += 1
 
     return imax
-
-
 
 # Return the dominant frequency using an iterative algorithm:
 # Y is the FFT of the signal or its autocorrelation.
@@ -239,3 +263,48 @@ def typical_cycle_error(period,data,ytyp):
             j += 1
         i += 1
     return typdiff
+
+
+# Find all periods in the input data y.
+# Input: sequence y, bool round (if we're rounding to integral periods)
+# Output: cycles, which contains [period length , sequence of typical period]
+# with the last element being [1, sequence with non-periodic part]
+def find_multiple_periods(y,round):
+    cycles=[]
+    findperiod=True
+    while(findperiod):
+    
+        fac=autocorrelate(y)
+
+        yac=normalize_by_first(fac)
+        fac=np.fft.rfft(yac)
+        p=detect_period(fac,len(yac))
+    
+        # Must have 10 cycles in the data.
+        if p > len(yac)/10:
+            p=1
+        
+        if(round):
+            p=np.round(p)
+
+        # don't repeat periods
+        i=0
+        while (i < len(cycles)):
+            if p == cycles[i][0]:
+                p=1
+            i += 1
+
+        if p > 1:
+            ytyp=typical_cycle(p,y)
+            cycles.append([p,ytyp])
+            y=rm_typical_cycle(p,y,ytyp)
+
+        else:
+            findperiod=False
+
+        # And stop looping if we get more than 10 (we're probably stuck...)
+        if len(cycles) > 10:
+            findperiod=False
+            
+    cycles.append([1,y])
+    return cycles

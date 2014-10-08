@@ -19,6 +19,15 @@ def abs2(z):
 def abs(z):
     return np.sqrt(abs2(z))
 
+def write_tv_seq_to_file(data,filename):
+    f=open(filename, 'wb')
+    datawriter = csv.writer(f, delimiter='\t')
+    i=0
+    while i < len(data):
+        datawriter.writerow(data[i])
+        i += 1
+    f.close()
+
 # write the y-values to a an output file in (t,val) pairs.
 def write_y_to_file(y,filename):
     f=open(filename, 'wb')

@@ -47,7 +47,52 @@ def main(argv):
     print str(len(data))+" data points found"
 
     # Consider only the stationary part of the data:
-    data=stationary_part(data)
+    #data=
+    start=stationary_part(data)
+    print "Stationarity starts at "+str(start)
+    data=data[start:len(data)]
+    write_tv_seq_to_file(data,"data.stat")
+
+    
+
+    # Put the y-values from the input data into y:
+    y=y_part(data)
+
+    # Remove the linear fit:
+    ylin=linear_fit(y)
+    i=0
+    while i < len(y):
+        y[i] -= ylin[i]
+        i += 1
+    write_y_to_file(y,"data")
+
+    # Compute the autocorrelation and normalize
+    yac=autocorrelate(y)
+    yac=normalize_by_first(yac)
+    write_y_to_file(yac,"data.ac")
+
+    # The FFT of the autocorrelation
+    fac=np.fft.rfft(yac)
+    write_abs_y_to_file(fac,"data.fac")
+
+    # Find all periodic components, store in the cycles array.
+    # Last element of array contains remainder.
+    cycles=find_multiple_periods(y,round)
+    
+    #print "Detected period: "+str(period)
+    periods=[]
+    i=0
+    while i < len(cycles)-1:
+        print "period="+str(cycles[i][0])
+        periods.append(cycles[i][0])
+        write_y_to_file(cycles[i][1],"data.ytyp"+str(i))
+        i += 1
+
+    # Write the period length to a file for use with latex.
+    f = open('tex/def_start.tex', 'w')
+    f.write("\def\startval{"+str(start)+"}")
+    f.close();
+    
 
     # Put the y-values from the input data into y:
     y=y_part(data)

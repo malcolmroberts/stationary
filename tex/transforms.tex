@@ -45,6 +45,8 @@
 \input{defrun.tex}
 %\def\filename{perfectsine}
 
+\input{def_start.tex}
+
 \input{def_a.tex}
 %\def\aval{500}
 \input{def_b.tex}
@@ -56,7 +58,9 @@
 \begin{figure}[htbp]
   \begin{center}        
     \includegraphics{../data}
-    \caption{\texttt{\filename} with linear regression removed.}
+    \caption{\texttt{\filename} with linear regression removed.
+    Stationarity starts at \startval{}.}
+
   \end{center}
 \end{figure}
 

@@ -5,6 +5,8 @@
 \usepackage{hyperref}
 \usepackage{datetime}
 \usepackage{natbib}
+\usepackage{ifthen}
+\usepackage{etoolbox}
 
 \definecolor{heavyblue}{cmyk}{1,1,0,0.25}
 
@@ -35,7 +37,6 @@
 
 \newcommand{\no}[1]{\hiderel{#1}}
 
-
 \begin{document}
 
 \begin{center}
@@ -45,48 +46,75 @@
 \input{defrun.tex}
 %\def\filename{perfectsine}
 
+
+%\input{def_a.tex}
+%\def\aval{500}
+%\input{def_b.tex}
+%\def\bval{500}
+
 \input{def_start.tex}
 
-\input{def_a.tex}
-%\def\aval{500}
-\input{def_b.tex}
-%\def\bval{500}
-\input{def_period.tex}
+\newcounter{start}
+\defcounter{start}{\startval}
+
+\newbool{stationary}
+\ifboolexpr{test{\ifnumcomp{\value{start}}{>}{-1}}}
+           {\setbool{stationary}{true}}
+           {\setbool{stationary}{false}}
+
+\input{def_nperiods.tex}
+\newcounter{nper}
+\defcounter{nper}{\nperiods{}}
+
+\newbool{periodic}
+\ifboolexpr{test{\ifnumcomp{\value{nper}}{>}{0}}}
+           {\setbool{periodic}{true}}
+           {\setbool{periodic}{false}}
 
 %\section{Introduction}
+Input file: \texttt{\filename}. %
+\ifbool{stationary}%
+       {Stationarity starts at \startval{}.}%
+       {No stationarity detected.} %
+\ifbool{periodic}%
+       {The steady state is periodic.}%
+       {The steady state is not periodic.}
 
 \begin{figure}[htbp]
   \begin{center}        
     \includegraphics{../data}
-    \caption{\texttt{\filename} with linear regression removed.
-    Stationarity starts at \startval{}.}
-
+    \caption{Input.}
   \end{center}
 \end{figure}
 
-\begin{figure}[htbp]
-  \begin{center}        
-    \includegraphics{../data_ac}
-    \caption{Autocorrelation.}
-    %\caption{Input signal from \aval{} to \bval{} with linear}
-  \end{center}
-\end{figure}
+\ifbool{stationary}{
+  \begin{figure}[htbp]
+    \begin{center}        
+      \includegraphics{../data_ac}
+      \caption{Autocorrelation.}
+      %\caption{Input signal from \aval{} to \bval{} with linear}
+    \end{center}
+  \end{figure}
+  
+  \begin{figure}[htbp]
+    \begin{center}
+      \includegraphics{../data_fac}
+      \caption{FFT of autocorrelation.}
+      %\caption{Input signal from \aval{} to \bval{} with linear}
+    \end{center}
+  \end{figure}
 
-\begin{figure}[htbp]
-  \begin{center}
-    \includegraphics{../data_fac}
-    \caption{FFT of autocorrelation.}
-    %\caption{Input signal from \aval{} to \bval{} with linear}
-  \end{center}
-\end{figure}
+  \ifbool{periodic}{
+    \input{def_period.tex}  
+    \begin{figure}[htbp]
+      \begin{center}        
+        \includegraphics{../data_typ}
+        \caption{Detected typical cycles with periods in \periodlength{}.}
+      \end{center}
+    \end{figure}
+  }{}   % periodicity check
+}{}  % stationary check
 
-\begin{figure}[htbp]
-  \begin{center}        
-    \includegraphics{../data_typ}
-    \caption{Detected typical cycles with periods in \periodlength{}.}
-  \end{center}
-\end{figure}
-
-
+  
 \end{document}
 

@@ -25,15 +25,9 @@ if [ "$1" != "" ]; then
 	echo "\def\bval{end}" > tex/def_b.tex
     fi
     
-    nperiods=$(cat nperiods)
     
     cd tex
-    if [ $nperiods != "1" ]; then
-	latexmk -pdf transforms
-    else
-	latexmk -pdf transforms_np
-	mv transforms_np.pdf transforms.pdf
-    fi
+    latexmk -pdf transforms
     cd -
     
     outfile=$(echo $1 | sed 's/dinputs//'| sed 's/cinputs//')

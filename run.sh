@@ -36,7 +36,7 @@ mv plot.pdf data_fac.pdf
 
 nperiods=$(cat nperiods)
 
-if [ $nperiods != "1" ]; then
+if [ $nperiods != "0" ]; then
     # find all the typical run files, turn newlines into commas,
     # remove last comma.
     TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )

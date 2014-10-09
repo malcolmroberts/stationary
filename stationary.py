@@ -92,10 +92,21 @@ def main(argv):
         write_y_to_file(cycles[i][1],"data.ytyp"+str(i))
         i += 1
 
-    # Write the period length to a file for use with latex.
-    f = open('tex/def_period.tex', 'w')
-    f.write("\def\periodlength{"+str(periods)+"}")
+    # Output the number of periods for the bash script
+    f = open('nperiods', 'w')
+    f.write(str(len(periods)))
     f.close();
+
+    # Output the number of periods for the tex file
+    f = open('tex/def_nperiods.tex', 'w')
+    f.write("\def\\nperiods{"+str(len(periods))+"}")
+    f.close();
+    
+    if len(periods) > 0:
+        # Write the period length to a file for use with latex.
+        f = open('tex/def_period.tex', 'w')
+        f.write("\def\periodlength{"+str(periods)+"}")
+        f.close();
     
     # Write number of periods to file
     f = open('nperiods', 'w')

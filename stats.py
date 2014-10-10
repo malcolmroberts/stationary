@@ -47,7 +47,9 @@ def stationary_part(list):
 def is_stationary(y0,y1):
     random.shuffle(y0)
     random.shuffle(y1)
-    T,p= scipy.stats.wilcoxon(y0, y1)
+    #T,p= scipy.stats.wilcoxon(y0, y1)
+
+    D,p = scipy.stats.ks_2samp(y0,y1)
     #print "T="+str(T)
     #print "p="+str(p)
     if (p > 0.1):

@@ -93,14 +93,16 @@ def dominant_freq(Y):
 # Y is the FFT of the signal or its autocorrelation.
 # n is the length of the original data.
 def detect_period(Y,n):
-    maxit=32 # Maximum number of iterations
+    maxit=64 # Maximum number of iterations
     maxerr=1e-3 # Tolerance for the difference between the detected
                 # mode and the nearest mode on the grid.
     
     # Set test-max to a very large value initially
     err=sys.float_info.max
-    # Initialize n
+
+    # Initialize nfit
     nfit=n
+
     # nfit0 is used to see if nfit is stable from iteration to
     # iteration.
     nfit0=0
@@ -109,46 +111,25 @@ def detect_period(Y,n):
     i=0
     while cont:
         # Mode (on the grid) with max frequency:
-        freq_i=dominant_freq(Y[0:int(np.floor(nfit/2))])
-        #print freq_i
-        #print len(Y)
+        freq_i = dominant_freq(Y[0:int(np.floor(nfit/2))])
 
         # Interpolate around the peak to see if there's a better max:
         ishift=paramax(abs(Y[freq_i-1]),abs(Y[freq_i]),abs(Y[freq_i+1]))
         # Interpolated frequency:
 	freq=freq_i + ishift
 
-        # Amplitude of dominant mode of the autocorrelation:
-        amp=abs(Y[freq_i])
-        #print "amplitude="+str(amp)
-        # Confidence interval:
-        nf=1.96/np.sqrt(n);
-        #print "Confidence interval: "+str(nf)
-
-        # check whether the amplitude is above the confidence interval:
-        if amp < nf:
-            print "amp too small"
-            return 1
-
         # Length of period from interpolated frequency:
         period=n/freq
+        
         # Number of interpolated periods that fit in data:
         nperiod=int(np.floor(n/period))
+        
         # Max data size with an integral number of periods:
-        #nfit=int(np.floor(nperiod*period)/2)
         nfit=int(np.floor(nperiod*period))
+        
         # Difference between frequency and nearest integral mode:
         err=np.abs(freq-np.round(freq))
-        
-        # Diagnostic output:
-        #print
-        #print "nfit="+str(nfit)
-        #print "nfit0="+str(nfit0)
-        #print "freq="+str(freq)
-        #print "period="+str(period)
-        #print "nperiod="+str(nperiod)
-        #print "err="+str(err)
-       
+
         # Stop if the number of cycles that fits changes by less than
         # 1 data point per iteration.
         if (np.fabs(nfit-nfit0) < 1):
@@ -265,6 +246,28 @@ def typical_cycle_error(period,data,ytyp):
     return typdiff
 
 
+def significant_cycle(yac):
+    izero=0
+
+    i=0
+    while(izero == 0 and i < len(yac)):
+        if(yac[i] < 0):
+            izero=i
+        i += 1
+        
+    n=len(yac)
+
+    i=izero
+    while(i < n):
+        #ac95 = 1.96 / np.sqrt(n)
+        ac95 = (-1 + 1.96 * np.sqrt(n - i - 1))/(n-i)
+        if(np.abs(yac[i]) > ac95):
+            return True
+        i += 1
+
+    return (False)
+
+
 # Find all periods in the input data y.
 # Input: sequence y, bool round (if we're rounding to integral periods)
 # Output: cycles, which contains [period length , sequence of typical period]
@@ -274,9 +277,12 @@ def find_multiple_periods(y,round):
     findperiod=True
     while(findperiod):
     
-        fac=autocorrelate(y)
+        yac=autocorrelate(y)
+        yac=normalize_by_first(yac)
 
-        yac=normalize_by_first(fac)
+        if not significant_cycle(yac):
+           return cycles
+
         fac=np.fft.rfft(yac)
         p=detect_period(fac,len(yac))
     
@@ -284,8 +290,9 @@ def find_multiple_periods(y,round):
         if p > len(yac)/10:
             p=1
         
-        if(round):
-            p=np.round(p)
+        if p > 1:
+            if(round):
+                p=np.round(p)
 
         # don't repeat periods
         i=0
@@ -298,12 +305,11 @@ def find_multiple_periods(y,round):
             ytyp=typical_cycle(p,y)
             cycles.append([p,ytyp])
             y=rm_typical_cycle(p,y,ytyp)
-
         else:
             findperiod=False
 
         # And stop looping if we get more than 10 (we're probably stuck...)
-        if len(cycles) > 10:
+        if len(cycles) > 20:
             findperiod=False
             
     cycles.append([1,y])

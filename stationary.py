@@ -20,6 +20,7 @@ def main(argv):
     filename=""
 
     round=True
+    #round=False
 
     # Load the command-line arguments
     try:
@@ -46,8 +47,10 @@ def main(argv):
         data.append(row)
     print str(len(data))+" data points found"
 
+    # Write the input to file.
+    write_tv_seq_to_file(data,"data.in")
+
     # Consider only the stationary part of the data:
-    #data=
     start=stationary_part(data)
     print "Stationarity starts at "+str(start)
     data=data[start:len(data)]
@@ -58,6 +61,10 @@ def main(argv):
     f.write("\def\startval{"+str(start)+"}")
     f.close();
     
+    # Output the start of stationarity for the bash script
+    f = open('startval', 'w')
+    f.write(str(start))
+    f.close();
 
     # Put the y-values from the input data into y:
     y=y_part(data)
@@ -68,7 +75,6 @@ def main(argv):
     while i < len(y):
         y[i] -= ylin[i]
         i += 1
-    write_y_to_file(y,"data")
 
     # Compute the autocorrelation and normalize
     yac=autocorrelate(y)

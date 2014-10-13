@@ -22,12 +22,14 @@ rm -f data.ytyp*
 
 ./stationary.py -f cfile $rstring
 
+startval=$(cat startval)
+
 # original file minus linear term, and add the typical cycle
-asy -f pdf plot.asy  -u "filenames=\"data,data.typ\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+asy -f pdf plot.asy  -u "filenames=\"data.in\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\" ; start=$startval"
 mv plot.pdf data.pdf
 
 # autocorrelation
-asy -f pdf plot.asy  -u "filenames=\"data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\""
+asy -f pdf plot.asy  -u "filenames=\"data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\" ; x95=true"
 mv plot.pdf data_ac.pdf
 
 # FFT of autocorrelation

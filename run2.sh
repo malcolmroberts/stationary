@@ -4,11 +4,6 @@
 # usage: 
 # ./run2.sh <input filename> <bool for whether to round or not>
 
-rstring=""
-if [ "$2" != "" ]; then
-    rstring=$2
-fi
-
 if [ "$1" != "" ]; then
 
     ./run.sh $1 $2

@@ -9,6 +9,7 @@ string ylabel="";
 bool logscale=false;
 int end=0;
 bool x95=false;
+real start=0;
 usersetting();
 
 if(filenames == "")
@@ -67,15 +68,19 @@ while(flag) {
       draw(graph(x,y,x>0),Pen(n),texify("data file"));
     } else {
       real nf=1.96/sqrt(x.length);
-      
       //-1.96/sqrt(length(x));
       draw(graph(x,y,x<end),Pen(n),texify("data file"));
 
+      if(start > 0) {
+	// Inidicate the start of stationarity.
+	xequals(start,grey+dashed);
+      }
+	
       if(x95) {
 	// draw 95% confidence intervals
-	yequals(nf,grey);
+	yequals(nf,grey+dashed);
 	yequals(0,grey);
-	yequals(-nf,grey);
+	yequals(-nf,grey+dashed);
       }
       
     }

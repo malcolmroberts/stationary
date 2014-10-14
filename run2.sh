@@ -11,7 +11,7 @@ if [ "$1" != "" ]; then
     echo "\def\filename{$1}" > tex/defrun.tex
     
     cd tex
-    latexmk -pdf transforms
+    latexmk -pdf transforms &> /dev/null
     cd -
     
     outfile=$(echo $1 | sed 's/dinputs//'| sed 's/cinputs//')

@@ -74,11 +74,11 @@
 %\section{Introduction}
 Input file: \texttt{\filename}. %
 \ifbool{stationary}%
-       {Stationarity starts at \startval{}.}%
-       {No stationarity detected.} %
-\ifbool{periodic}%
+       {Stationarity starts at \startval{}.\ifbool{periodic}%
        {The steady state is periodic.}%
        {The steady state is not periodic.}
+}%
+       {No stationarity detected.} %
 
 \begin{figure}[htbp]
   \begin{center}        

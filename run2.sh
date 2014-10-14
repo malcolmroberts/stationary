@@ -9,17 +9,6 @@ if [ "$1" != "" ]; then
     ./run.sh $1 $2
 
     echo "\def\filename{$1}" > tex/defrun.tex
-    if [ "$2" != "" ]; then
-	echo "\def\aval{$2}" > tex/def_a.tex
-    else
-	echo "\def\aval{start}" > tex/def_a.tex
-    fi
-    if [ "$3" != "" ]; then
-	echo "\def\bval{$3}" > tex/def_b.tex
-    else
-	echo "\def\bval{end}" > tex/def_b.tex
-    fi
-    
     
     cd tex
     latexmk -pdf transforms

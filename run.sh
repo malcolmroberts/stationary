@@ -28,27 +28,23 @@ startval=$(cat startval)
 asy -f pdf plot.asy  -u "filenames=\"data.in\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\" ; start=$startval"
 mv plot.pdf data.pdf
 
-# autocorrelation
-asy -f pdf plot.asy  -u "filenames=\"data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\" ; x95=true"
-mv plot.pdf data_ac.pdf
+if [ "$startval" -ge "0" ]; then
 
-# FFT of autocorrelation
-asy -f pdf plot.asy  -u "filenames=\"data.fac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"loglog\""
-mv plot.pdf data_fac.pdf
+    # autocorrelation
+    asy -f pdf plot.asy  -u "filenames=\"data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\" ; x95=true"
+    mv plot.pdf data_ac.pdf
 
-nperiods=$(cat nperiods)
+    # FFT of autocorrelation
+    asy -f pdf plot.asy  -u "filenames=\"data.fac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"loglog\""
+    mv plot.pdf data_fac.pdf
 
-if [ $nperiods != "0" ]; then
-    # find all the typical run files, turn newlines into commas,
-    # remove last comma.
-    TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
-    asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
-    mv plot.pdf data_typ.pdf
+    nperiods=$(cat nperiods)
+
+    if [ $nperiods != "0" ]; then
+	# find all the typical run files, turn newlines into commas,
+	# remove last comma.
+	TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
+	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+	mv plot.pdf data_typ.pdf
+    fi
 fi
-
-
-# TODO: compile the pdf
-
-# TODO: put the filename in the PDF
-
-# TODO: add the error term somwehere in the PDF,

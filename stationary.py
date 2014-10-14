@@ -94,7 +94,10 @@ def main(argv):
         print "Error: the specified file \""+filename+ " \" does not exist"
         print usage
         sys.exit(2)
-    
+    else:
+        print "Analyzing "+filename
+        
+
     # Read the data
     data = []
     csvReader = csv.reader(open(filename, 'rb'), delimiter='\t')

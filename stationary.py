@@ -10,63 +10,8 @@ from cycle import *
 from utils import *
 from stats import *
 
-
-# Main program
-def main(argv):
-    usage="./stationary -f <filename>"
-
-    # Filename for the input data (consisting of tab-separated
-    # (time,value) pairs.
-    filename=""
-
-    round=True
-    #round=False
-
-    # Load the command-line arguments
-    try:
-        opts, args = getopt.getopt(argv,"f:r:")
-    except getopt.GetoptError:
-        print usage
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt in ("-f"):
-            filename=arg
-        if opt in ("-r"):
-            round=(arg == "True" or arg == "true" or arg == "1")
-
-    # Check that the file exists (and is not a directory):
-    if not (os.path.isfile(filename)):
-        print "Error: the specified file \""+filename+ " \" does not exist"
-        print usage
-        sys.exit(2)
-    
-    # Read the data
-    data = []
-    csvReader = csv.reader(open(filename, 'rb'), delimiter='\t')
-    for row in csvReader:
-        data.append(row)
-    print str(len(data))+" data points found"
-
-    # Write the input to file.
-    write_tv_seq_to_file(data,"data.in")
-
-    # Consider only the stationary part of the data:
-    start=stationary_part(data)
-    print "Stationarity starts at "+str(start)
-    data=data[start:len(data)]
-    write_tv_seq_to_file(data,"data.stat")
-
-    # Write the period length to a file for use with latex.
-    f = open('tex/def_start.tex', 'w')
-    f.write("\def\startval{"+str(start)+"}")
-    f.close();
-    
-    # Output the start of stationarity for the bash script
-    f = open('startval', 'w')
-    f.write(str(start))
-    f.close();
-
-    # Put the y-values from the input data into y:
+def process_stationary_signal(start,data):
+        # Put the y-values from the input data into y:
     y=y_part(data)
 
     # Remove the linear fit:
@@ -118,6 +63,68 @@ def main(argv):
     f = open('nperiods', 'w')
     f.write(str(len(periods)))
     f.close();
+
+
+
+# Main program
+def main(argv):
+    usage="./stationary -f <filename>"
+
+    # Filename for the input data (consisting of tab-separated
+    # (time,value) pairs.
+    filename=""
+
+    round=True
+    #round=False
+
+    # Load the command-line arguments
+    try:
+        opts, args = getopt.getopt(argv,"f:r:")
+    except getopt.GetoptError:
+        print usage
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-f"):
+            filename=arg
+        if opt in ("-r"):
+            round=(arg == "True" or arg == "true" or arg == "1")
+
+    # Check that the file exists (and is not a directory):
+    if not (os.path.isfile(filename)):
+        print "Error: the specified file \""+filename+ " \" does not exist"
+        print usage
+        sys.exit(2)
+    
+    # Read the data
+    data = []
+    csvReader = csv.reader(open(filename, 'rb'), delimiter='\t')
+    for row in csvReader:
+        data.append(row)
+    print str(len(data))+" data points found"
+
+    # Write the input to file.
+    write_tv_seq_to_file(data,"data.in")
+
+    # Consider only the stationary part of the data:
+    start=stationary_part(data)
+
+    # Write the period length to a file for use with latex.
+    f = open('tex/def_start.tex', 'w')
+    f.write("\def\startval{"+str(start)+"}")
+    f.close();
+
+    # Output the start of stationarity for the bash script
+    f = open('startval', 'w')
+    f.write(str(start))
+    f.close();
+
+    if(start < 0):
+        print "Signal is non-stationary."
+    else:
+        print "Stationarity starts at "+str(start)
+        data=data[start:len(data)]
+        write_tv_seq_to_file(data,"data.stat")
+        process_stationary_signal(start,data)
 
 # The main program is called from here
 if __name__ == "__main__":

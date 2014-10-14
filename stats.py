@@ -11,31 +11,32 @@ def stationary_part(list):
     y=y_part(list)
 
     minlen=100  # min length of sample.
+    n=len(y)
 
     a=0
-    alast=a
-    n=len(y)
+    low=0
+    high=n
 
     # Use bisection method to find start of stationarity
     go=True
     while(go):
-        if not 2*np.floor((n-a)/2) == n-a:
-            a += 1
-
         # Not enough points in range: considered not stationary
         if (n - a) < minlen:
             return -1
 
-        h = int(np.floor((n-a)/2))
+        alast=a
 
-        if is_stationary(y[n - 2*h:n-h],y[n - h  :n]):
-            a = int(np.floor((a+alast)/2))
+        good=is_stationary(y[a:n])
+
+        if good:
+            high = a
+            a = int(np.floor((a+low)/2))
         else:
-            alast=a
-            a = int(np.floor((n-a)/2))
-        
+            low = a
+            a = int(np.floor((high+a)/2))
+
         # Close enough!
-        if(np.abs(a-alast) < 10):
+        if(np.abs(a-alast) < 2):
             return a
 
         # Stop if the entire time series is stationary
@@ -44,7 +45,13 @@ def stationary_part(list):
     
     return a
 
-def is_stationary(y0,y1):
+def is_stationary(y):
+    n=len(y)
+
+    h = int(np.floor(n/2))
+    y0=y[0:h]
+    y1=y[n-h:n]
+
     random.shuffle(y0)
     random.shuffle(y1)
 

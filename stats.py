@@ -59,6 +59,11 @@ def is_stationary(y):
 
     D,p = scipy.stats.ks_2samp(y0,y1)
 
+    # requires 0.14 of scipy
+    #A2, critical, p = scipy.stats.anderson_ksamp([y0,y1])
+
+    print p
+
     if (p > 0.1):
         # Null hypothesis likely: same dist, so steady 
         return True

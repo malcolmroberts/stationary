@@ -7,3 +7,12 @@ Implement tests for statistical stationarity.
 Check for significance in autocorrelation when determining period.
 
 Check that there are at least 10 cycles when determining period.
+
+Mood's test:
+http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.mood.html
+only deals with changes in median; not good for heteroscedasticity
+
+Anderson-Darling k-sample:
+http://docs.scipy.org/doc/scipy-0.14.0/reference/generated/scipy.stats.anderson_ksamp.html#scipy.stats.anderson_ksamp
+
+wrap Python for C++?

@@ -124,7 +124,7 @@ def main(argv):
     if(start < 0):
         print "Signal is non-stationary."
     else:
-        print "Stationarity starts at "+str(start)
+        print "Stationarity starts at "+str(start)+ " of "+str(len(data)) + " points ("+str((100.0*start)/len(data))+" %)"
         data=data[start:len(data)]
         write_tv_seq_to_file(data,"data.stat")
         process_stationary_signal(start,data)

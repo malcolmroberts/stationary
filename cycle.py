@@ -113,6 +113,9 @@ def detect_period(Y,n):
         # Mode (on the grid) with max frequency:
         freq_i = dominant_freq(Y[0:int(np.floor(nfit/2))])
 
+        if freq_i == 0:
+            return 1
+
         # Interpolate around the peak to see if there's a better max:
         ishift=paramax(abs(Y[freq_i-1]),abs(Y[freq_i]),abs(Y[freq_i+1]))
         # Interpolated frequency:

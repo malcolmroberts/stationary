@@ -17,8 +17,8 @@ if [ "$1" != "" ]; then
     outfile=$(echo $1 | sed 's/dinputs//'| sed 's/cinputs//')
 
     echo $outfile
-    mkdir -p cinputs/xcorr_pdfs
-    cp tex/transforms.pdf cinputs/xcorr_pdfs/$outfile.pdf
+    mkdir -p xcorr_pdfs
+    cp tex/transforms.pdf xcorr_pdfs/$outfile.pdf
 
     echo $1
 

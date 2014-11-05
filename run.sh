@@ -16,11 +16,11 @@ fi
 
 echo "Running " $1
 
-./change_format.py $1 cfile
+#./change_format.py $1 cfile
 
 rm -f data.ytyp*
 
-./stationary.py -f cfile $rstring
+./stationary.py -f $1 $rstring
 
 startval=$(cat startval)
 
@@ -46,5 +46,9 @@ if [ "$startval" -ge "0" ]; then
 	TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
 	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
 	mv plot.pdf data_typ.pdf
+
+    asy -f pdf plot.asy  -u "filenames=\"data.np\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+    mv plot.pdf data_np.pdf
+
     fi
 fi

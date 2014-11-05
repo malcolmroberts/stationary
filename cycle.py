@@ -207,15 +207,16 @@ def rm_typical_cycle(period,y,ytyp):
     while i < len(y):
         newy.append(y[i])
         i += 1
-    nperiod=int(np.floor(len(y)/period))
+    nperiod=int(np.ceil(len(y)/period))
     i=0
     while i < len(ytyp):
         j=0
         while j < nperiod:
             jbase=int(np.floor(period*j))
             pos=jbase+i
-            diff=ytyp[i] - float(y[pos])
-            newy[pos] = diff
+            if(pos < len(y)):
+                diff=ytyp[i] - float(y[pos])
+                newy[pos] = diff
             j += 1
         i += 1
     return newy
@@ -316,4 +317,4 @@ def find_multiple_periods(y,round):
             findperiod=False
             
     cycles.append([1,y])
-    return cycles
+    return cycles, y

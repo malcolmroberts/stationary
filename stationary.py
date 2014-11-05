@@ -10,7 +10,7 @@ from cycle import *
 from utils import *
 from stats import *
 
-def process_stationary_signal(start,data):
+def process_stationary_signal(start,data,round):
         # Put the y-values from the input data into y:
     y=y_part(data)
 
@@ -32,8 +32,11 @@ def process_stationary_signal(start,data):
 
     # Find all periodic components, store in the cycles array.
     # Last element of array contains remainder.
-    cycles=find_multiple_periods(y,round)
+    cycles, yleft=find_multiple_periods(y,round)
     
+    # Compute the autocorrelation and normalize
+    write_y_to_file(yleft,"data.np")
+
     #print "Detected period: "+str(period)
     periods=[]
     i=0
@@ -127,7 +130,7 @@ def main(argv):
         print "Stationarity starts at "+str(start)+ " of "+str(len(data)) + " points ("+str((100.0*start)/len(data))+" %)"
         data=data[start:len(data)]
         write_tv_seq_to_file(data,"data.stat")
-        process_stationary_signal(start,data)
+        process_stationary_signal(start,data,round)
 
 # The main program is called from here
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ def process_stationary_signal(start,data,round):
     ylin=linear_fit(y)
     i=0
     while i < len(y):
-        y[i] -= ylin[i]
+        #y[i] -= ylin[i]
         i += 1
 
     # Compute the autocorrelation and normalize

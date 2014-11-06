@@ -2,6 +2,7 @@
 # stationary tail.
 import random
 import numpy as np
+from cycle import *
 
 import scipy.stats # Science!
 
@@ -47,6 +48,8 @@ def stationary_part(list):
 
 def is_stationary(y):
     n=len(y)
+
+    #cycles, y=find_multiple_periods(y,round)
 
     h = int(np.floor(n/2))
     y0=y[0:h]

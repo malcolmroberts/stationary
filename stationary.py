@@ -103,6 +103,11 @@ def main(argv):
         if opt in ("-r"):
             round=(arg == "True" or arg == "true" or arg == "1")
 
+    if round:
+        print "Period lengths are rounded."
+    else:
+        print "Period lengths are not rounded."
+
     # Check that the file exists (and is not a directory):
     if not (os.path.isfile(filename)):
         print "Error: the specified file \""+filename+ " \" does not exist"

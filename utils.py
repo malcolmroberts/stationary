@@ -29,12 +29,12 @@ def write_tv_seq_to_file(data,filename):
     f.close()
 
 # write the y-values to a an output file in (t,val) pairs.
-def write_y_to_file(y,filename):
+def write_y_to_file(y,filename,start=0):
     f=open(filename, 'wb')
     datawriter = csv.writer(f, delimiter='\t')
     i=0
     while i < len(y):
-        datawriter.writerow([i,y[i]])
+        datawriter.writerow([i+start,y[i]])
         i += 1
     f.close()
 

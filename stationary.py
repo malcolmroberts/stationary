@@ -14,12 +14,23 @@ def process_stationary_signal(start,data,round):
         # Put the y-values from the input data into y:
     y=y_part(data)
 
-    # Remove the linear fit:
-    ylin=linear_fit(y)
+    # Remove the mean signal:
+    ymean=0
     i=0
     while i < len(y):
-        #y[i] -= ylin[i]
+        ymean += y[i]
         i += 1
+    i=0
+    while i < len(y):
+        y[i] -= ymean/len(y)
+        i += 1
+
+    # # Remove the linear fit:
+    # ylin=linear_fit(y)
+    # i=0
+    # while i < len(y):
+    #     y[i] -= ylin[i]
+    #     i += 1
 
     # Compute the autocorrelation and normalize
     yac=autocorrelate(y)
@@ -35,7 +46,7 @@ def process_stationary_signal(start,data,round):
     cycles, yleft=find_multiple_periods(y,round)
     
     # Compute the autocorrelation and normalize
-    write_y_to_file(yleft,"data.np")
+    write_y_to_file(yleft,"data.np",start)
 
     #print "Detected period: "+str(period)
     periods=[]

@@ -6,7 +6,7 @@
 
 if [ "$1" != "" ]; then
 
-    ./run.sh $1 $2
+    ./run.sh $1 $2 $3 $4
 
     echo "\def\filename{$1}" > tex/defrun.tex
     

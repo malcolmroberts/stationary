@@ -2,7 +2,7 @@
 
 # A simple bash script to generate output from stationary.py
 # usage:
-# ./run.sh <filename> <bool for whether to round or not>
+# ./run.sh <filename> <bool for whether to round or not> <stest> <p-value>
 
 if [ "$1" == "" ]; then
     echo "Gotta specify a file!"
@@ -14,13 +14,23 @@ if [ "$2" != "" ]; then
     rstring="-r "$2
 fi
 
+sstring=""
+if [ "$3" != "" ]; then
+    sstring="-s "$3
+fi
+
+pstring=""
+if [ "$4" != "" ]; then
+    pstring="-p "$4
+fi
+
 echo "Running " $1
 
 #./change_format.py $1 cfile
 
 rm -f data.ytyp*
 
-./stationary.py -f $1 $rstring
+./stationary.py -f $1 $rstring $sstring $pstring
 
 startval=$(cat startval)
 
@@ -44,7 +54,7 @@ if [ "$startval" -ge "0" ]; then
 	# find all the typical run files, turn newlines into commas,
 	# remove last comma.
 	TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
-	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""  &> /dev/null
 	mv plot.pdf data_typ.pdf
 
     asy -f pdf plot.asy  -u "filenames=\"data.np\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""

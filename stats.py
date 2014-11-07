@@ -8,7 +8,7 @@ import scipy.stats # Science!
 
 from utils import *
 
-def stationary_part(list):
+def stationary_part(list,stest,p):
     y=y_part(list)
 
     minlen=100  # min length of sample.
@@ -27,7 +27,7 @@ def stationary_part(list):
 
         alast=a
 
-        good=is_stationary(y[a:n])
+        good=is_stationary(y[a:n],stest,p)
 
         if good:
             high = a
@@ -46,7 +46,7 @@ def stationary_part(list):
     
     return a
 
-def is_stationary(y):
+def is_stationary(y,stest,p_crit):
     n=len(y)
 
     #cycles, y=find_multiple_periods(y,round)
@@ -58,16 +58,24 @@ def is_stationary(y):
     random.shuffle(y0)
     random.shuffle(y1)
 
-    #T,p= scipy.stats.wilcoxon(y0, y1)
+    p=-1
 
-    D,p = scipy.stats.ks_2samp(y0,y1)
+    if stest == "wsr":
+        T,p= scipy.stats.wilcoxon(y0, y1)
+    if stest == "ks":
+        D,p = scipy.stats.ks_2samp(y0,y1)
 
     # requires 0.14 of scipy
     #A2, critical, p = scipy.stats.anderson_ksamp([y0,y1])
+    
+    if(p == -1):
+        print "Error: invalid choice of statistical test "+stest
+        exit(1)
 
-    print p
 
-    if (p > 0.1):
+    #print p
+
+    if (p > p_crit):
         # Null hypothesis likely: same dist, so steady 
         return True
     else: 

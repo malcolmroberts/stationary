@@ -52,7 +52,7 @@ def process_stationary_signal(start,data,round):
     periods=[]
     i=0
     while i < len(cycles)-1:
-        print "period="+str(cycles[i][0])
+        #print "period="+str(cycles[i][0])
         periods.append(cycles[i][0])
         write_y_to_file(cycles[i][1],"data.ytyp"+str(i))
         i += 1
@@ -82,7 +82,13 @@ def process_stationary_signal(start,data,round):
 
 # Main program
 def main(argv):
-    usage="./stationary -f <filename>"
+    usage="Usage:\n"\
+        "./stationary\n"\
+        "\t-f <filename> input filename\n"\
+        "\t-r <0 or 1 (default)>  round period to nearest ineteger?\n"\
+        "\t-s <ks (default), wsr>\ statistical test\n"\
+        "\t-p <real, defaul=0.1>\ specify p-value for stationarity\n"\
+        "\t-h display help message\n"
 
     # Filename for the input data (consisting of tab-separated
     # (time,value) pairs.
@@ -90,18 +96,26 @@ def main(argv):
 
     round=True
     #round=False
+    p=0.1
+    stest="ks"
 
     # Load the command-line arguments
     try:
-        opts, args = getopt.getopt(argv,"f:r:")
+        opts, args = getopt.getopt(argv,"f:r:p:s:")
     except getopt.GetoptError:
         print usage
         sys.exit(2)
     for opt, arg in opts:
+        if opt in ("-p"):
+            p=float(arg)
+        if opt in ("-s"):
+            stest=arg
         if opt in ("-f"):
             filename=arg
         if opt in ("-r"):
             round=(arg == "True" or arg == "true" or arg == "1")
+
+    print "Using "+stest+ " statistical test with p="+str(p)
 
     if round:
         print "Period lengths are rounded."
@@ -128,7 +142,7 @@ def main(argv):
     write_tv_seq_to_file(data,"data.in")
 
     # Consider only the stationary part of the data:
-    start=stationary_part(data)
+    start=stationary_part(data,stest,p)
 
     # Write the period length to a file for use with latex.
     f = open('tex/def_start.tex', 'w')

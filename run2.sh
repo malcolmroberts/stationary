@@ -11,16 +11,16 @@ if [ "$1" != "" ]; then
     echo "\def\filename{$1}" > tex/defrun.tex
     
     cd tex
+    echo "running latex..."
     latexmk -pdf transforms &> /dev/null
+    echo "   done."
     cd -
     
     outfile=$(echo $1 | sed 's/dinputs//'| sed 's/cinputs//')
 
-    echo $outfile
     mkdir -p xcorr_pdfs
     cp tex/transforms.pdf xcorr_pdfs/$outfile.pdf
 
-    echo $1
 
 else
     echo "specify the file!"

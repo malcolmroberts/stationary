@@ -61,7 +61,18 @@ while(flag) {
       end=y.length;
     else
       end=min(end,y.length);
-    real xmin=min(x);
+    real ymin=min(y);
+    real ymax=max(y);
+    
+    if(abs(ScaleY(1) ) < 1e-10) {
+      if(ymin == ymax) {
+	if(abs(ScaleX(1)) < 1e-10)
+	  scale(Log,Linear);
+	else
+	  scale(Linear,Linear);
+      }
+    }
+    
     //write(xmin);
     
     if(logscale) {

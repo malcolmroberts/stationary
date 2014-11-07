@@ -27,7 +27,7 @@ def stationary_part(list,stest,p):
 
         alast=a
 
-        good=is_stationary(y[a:n],stest,p)
+        good=is_stationary(y[a:n],stest,p,minlen)
 
         if good:
             high = a
@@ -46,7 +46,7 @@ def stationary_part(list,stest,p):
     
     return a
 
-def is_stationary(y,stest,p_crit):
+def is_stationary(y,stest,p_crit,minlen):
     n=len(y)
 
     #cycles, y=find_multiple_periods(y,round)
@@ -61,7 +61,16 @@ def is_stationary(y,stest,p_crit):
     p=-1
 
     if stest == "wsr":
-        T,p= scipy.stats.wilcoxon(y0, y1)
+        repeats,nr=scipy.stats.find_repeats(y)
+        ni=n
+        i=0
+        while i < len(nr):
+            ni -= nr[i]
+            i += 1
+        if ni < minlen:
+            p=1 # we call this stationary
+        else :
+            T,p= scipy.stats.wilcoxon(y0, y1)
     if stest == "ks":
         D,p = scipy.stats.ks_2samp(y0,y1)
 

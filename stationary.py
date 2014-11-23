@@ -94,12 +94,14 @@ def main(argv):
         "\t-r <0 or 1 (default)>  round period to nearest ineteger?\n"\
         "\t-s <ks (default), wsr>\ statistical test\n"\
         "\t-p <real, defaul=0.1>\ specify p-value for stationarity\n"\
+        "\t-c <0 or 1 (default)>  Remove period before testing for stationairty\n"\
         "\t-h display help message\n"
 
     # Filename for the input data (consisting of tab-separated
     # (time,value) pairs.
     filename=""
 
+    preremove_cycles = True
     round = True
     #round=False
     p = 0.1
@@ -107,19 +109,21 @@ def main(argv):
 
     # Load the command-line arguments
     try:
-        opts, args = getopt.getopt(argv,"f:r:p:s:")
+        opts, args = getopt.getopt(argv,"c:f:r:p:s:")
     except getopt.GetoptError:
         print usage
         sys.exit(2)
     for opt, arg in opts:
         if opt in ("-p"):
-            p=float(arg)
+            p = float(arg)
         if opt in ("-s"):
             stest=arg
         if opt in ("-f"):
-            filename=arg
+            filename = arg
         if opt in ("-r"):
-            round=(arg == "True" or arg == "true" or arg == "1")
+            round = (arg == "True" or arg == "true" or arg == "1")
+        if opt in ("-c"):
+            preremove_cycles = (arg == "True" or arg == "true" or arg == "1")
 
     print "Using "+stest+ " statistical test with p="+str(p)
 
@@ -127,6 +131,13 @@ def main(argv):
         print "Period lengths are rounded."
     else:
         print "Period lengths are not rounded."
+
+    if preremove_cycles:
+        print "Cyclic component removed before stationarity test."
+    else:
+        print "Cyclic component included in stationarity test."
+
+    print
 
     # Check that the file exists (and is not a directory):
     if not (os.path.isfile(filename)):
@@ -150,7 +161,7 @@ def main(argv):
     print "power of input: " +(str(power(y_part(data))))
 
     # Consider only the stationary part of the data:
-    start = stationary_part(data,stest,p)
+    start = stationary_part(data, stest, p, preremove_cycles, round)
 
     # Write the period length to a file for use with latex.
     f = open('tex/def_start.tex', 'w')

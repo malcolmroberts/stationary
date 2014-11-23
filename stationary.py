@@ -33,19 +33,19 @@ def process_stationary_signal(start,data,round):
     #     i += 1
 
     # Compute the autocorrelation and normalize
-    yac=autocorrelate(y)
-    yac=normalize_by_first(yac)
-    write_y_to_file(yac,"data.ac")
+    yac = autocorrelate(y)
+    yac = normalize_by_first(yac)
+    write_y_to_file(yac, "data.ac")
 
     # The FFT of the autocorrelation
     fac=np.fft.rfft(yac)
-    write_abs_y_to_file(fac,"data.fac")
+    write_abs_y_to_file(fac, "data.fac")
 
     # Find all periodic components, store in the cycles array.
     # Last element of array contains remainder.
-    cycles, yleft = find_multiple_periods(y,round)
+    cycles, yleft = find_multiple_periods(y, round)
 
-    i=0
+    i = 0
     while i < len(cycles)-1:
         print "Period length " +str(cycles[i][0]) + " has power " +str(power(cycles[i][1]))
         i += 1
@@ -55,12 +55,12 @@ def process_stationary_signal(start,data,round):
     write_y_to_file(yleft,"data.np",start)
 
     #print "Detected period: "+str(period)
-    periods=[]
-    i=0
+    periods = []
+    i = 0
     while i < len(cycles)-1:
         #print "period="+str(cycles[i][0])
         periods.append(cycles[i][0])
-        write_y_to_file(cycles[i][1],"data.ytyp"+str(i))
+        write_y_to_file(cycles[i][1], "data.ytyp" + str(i))
         i += 1
 
     # Output the number of periods for the bash script
@@ -70,7 +70,7 @@ def process_stationary_signal(start,data,round):
 
     # Output the number of periods for the tex file
     f = open('tex/def_nperiods.tex', 'w')
-    f.write("\def\\nperiods{"+str(len(periods))+"}")
+    f.write("\def\\nperiods{" + str(len(periods)) + "}")
     f.close();
     
     if len(periods) > 0:
@@ -88,7 +88,7 @@ def process_stationary_signal(start,data,round):
 
 # Main program
 def main(argv):
-    usage="Usage:\n"\
+    usage = "Usage:\n"\
         "./stationary\n"\
         "\t-f <filename> input filename\n"\
         "\t-r <0 or 1 (default)>  round period to nearest ineteger?\n"\
@@ -100,9 +100,9 @@ def main(argv):
     # (time,value) pairs.
     filename=""
 
-    round=True
+    round = True
     #round=False
-    p=0.1
+    p = 0.1
     stest="ks"
 
     # Load the command-line arguments

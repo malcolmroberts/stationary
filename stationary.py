@@ -11,18 +11,18 @@ from utils import *
 from stats import *
     
 def process_stationary_signal(start,data,round):
-        # Put the y-values from the input data into y:
-    y=y_part(data)
+    # Put the y-values from the input data into y:
+    y = y_part(data)
 
     # Remove the mean signal:
-    ymean=0
-    i=0
+    ymean = 0
+    i = 0
     while i < len(y):
         ymean += y[i]
         i += 1
-    i=0
+    i = 0
     while i < len(y):
-        y[i] -= ymean/len(y)
+        y[i] -= ymean / len(y)
         i += 1
 
     # # Remove the linear fit:
@@ -35,7 +35,7 @@ def process_stationary_signal(start,data,round):
     # Compute the autocorrelation and normalize
     yac = autocorrelate(y)
     yac = normalize_by_first(yac)
-    write_y_to_file(yac, "data.ac")
+    #write_y_to_file(yac, "data.ac")
 
     # The FFT of the autocorrelation
     fac=np.fft.rfft(yac)
@@ -45,44 +45,7 @@ def process_stationary_signal(start,data,round):
     # Last element of array contains remainder.
     cycles, yleft = find_multiple_periods(y, round)
 
-    i = 0
-    while i < len(cycles)-1:
-        print "Period length " +str(cycles[i][0]) + " has power " +str(power(cycles[i][1]))
-        i += 1
-    print "Non-periodic part of signal has power " +str(power(cycles[i][1]))
-
-    # Compute the autocorrelation and normalize
-    write_y_to_file(yleft,"data.np",start)
-
-    #print "Detected period: "+str(period)
-    periods = []
-    i = 0
-    while i < len(cycles)-1:
-        #print "period="+str(cycles[i][0])
-        periods.append(cycles[i][0])
-        write_y_to_file(cycles[i][1], "data.ytyp" + str(i))
-        i += 1
-
-    # Output the number of periods for the bash script
-    f = open('nperiods', 'w')
-    f.write(str(len(periods)))
-    f.close();
-
-    # Output the number of periods for the tex file
-    f = open('tex/def_nperiods.tex', 'w')
-    f.write("\def\\nperiods{" + str(len(periods)) + "}")
-    f.close();
-    
-    if len(periods) > 0:
-        # Write the period length to a file for use with latex.
-        f = open('tex/def_period.tex', 'w')
-        f.write("\def\periodlength{"+str(periods)+"}")
-        f.close();
-    
-    # Write number of periods to file
-    f = open('nperiods', 'w')
-    f.write(str(len(periods)))
-    f.close();
+    return yac, fac, cycles, yleft
 
 
 
@@ -158,7 +121,8 @@ def main(argv):
     # Write the input to file.
     write_tv_seq_to_file(data,"data.in")
 
-    print "power of input: " +(str(power(y_part(data))))
+    ypower = power(y_part(data))
+    print "power of input: " +str(ypower)
 
     # Consider only the stationary part of the data:
     start = stationary_part(data, stest, p, preremove_cycles, round)
@@ -173,13 +137,75 @@ def main(argv):
     f.write(str(start))
     f.close();
 
+    f = open("output", 'wb')
+    f.write(str(ypower))
+    f.write("\t")
+    f.write(str(start))
+    f.write("\t")
+    f.close()
+
     if(start < 0):
         print "Signal is non-stationary."
     else:
         print "Stationarity starts at "+str(start)+ " of "+str(len(data)) + " points ("+str((100.0*start)/len(data))+" %)"
         data = data[start:len(data)]
         write_tv_seq_to_file(data,"data.stat")
-        process_stationary_signal(start,data,round)
+        yac, fac, cycles, yleft = process_stationary_signal(start,data,round)
+    
+        write_y_to_file(yac, "data.ac")
+        write_abs_y_to_file(fac, "data.fac")
+
+        i = 0
+        while i < len(cycles)-1:
+            print "Period length " +str(cycles[i][0]) \
+                + " has power " +str(power(cycles[i][1]))
+            i += 1
+        print "Non-periodic part of signal has power "\
+            +str(power(cycles[i][1]))
+
+        # Compute the autocorrelation and normalize
+        write_y_to_file(yleft,"data.np",start)
+
+        #print "Detected period: "+str(period)
+        periods = []
+        i = 0
+        while i < len(cycles)-1:
+            #print "period="+str(cycles[i][0])
+            periods.append(cycles[i][0])
+            write_y_to_file(cycles[i][1], "data.ytyp" + str(i))
+            i += 1
+
+        # Output the number of periods for the bash script
+        f = open('nperiods', 'w')
+        f.write(str(len(periods)))
+        f.close();
+
+        # Output the number of periods for the tex file
+        f = open('tex/def_nperiods.tex', 'w')
+        f.write("\def\\nperiods{" + str(len(periods)) + "}")
+        f.close();
+    
+        if len(periods) > 0:
+            # Write the period length to a file for use with latex.
+            f = open('tex/def_period.tex', 'w')
+            f.write("\def\periodlength{"+str(periods)+"}")
+            f.close();
+    
+            periodpower = []
+            i = 0
+            while i < len(periods):
+                periodpower.append(power(cycles[i][1]))
+                i += 1
+            f = open('tex/def_period_power.tex', 'w')
+            f.write("\def\periodpower{"+str(periodpower)+"}")
+            f.close();
+        
+        # Write number of periods to file
+        f = open('nperiods', 'w')
+        f.write(str(len(periods)))
+        f.close();
+
+
 
 # The main program is called from here
 if __name__ == "__main__":

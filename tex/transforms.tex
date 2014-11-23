@@ -106,10 +106,12 @@ Input file: \texttt{\filename}. %
 
   \ifbool{periodic}{
     \input{def_period.tex}  
+    \input{def_period_power.tex}  
     \begin{figure}[htbp]
       \begin{center}        
         \includegraphics{../data_typ}
-        \caption{Detected typical cycles with periods in \periodlength{}.}
+        \caption{Detected typical cycles with periods in
+          \periodlength{} with power \periodpower{}.}
       \end{center}
     \end{figure}
     \begin{figure}[htbp]

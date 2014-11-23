@@ -276,8 +276,10 @@ def significant_cycle(yac):
 # Input: sequence y, bool round (if we're rounding to integral periods)
 # Output: cycles, which contains [period length , sequence of typical period]
 # with the last element being [1, sequence with non-periodic part]
-def find_multiple_periods(y,round):
+def find_multiple_periods(y, round):
     ypower = power(y)
+
+    min_ncycles = 10 #2 or 10
 
     cycles = []
     findperiod = True
@@ -292,9 +294,8 @@ def find_multiple_periods(y,round):
         fac = np.fft.rfft(yac)
         p = detect_period(fac,len(yac))
     
-        # Must have 10 cycles in the data.
-        if p > len(yac)/10:
-            p=1
+        if p > len(yac) / min_ncycles:
+            p = 1
         
         if p > 1:
             if(round):

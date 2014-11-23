@@ -11,7 +11,7 @@ from utils import *
 def stationary_part(list, stest, p, rmcycles, roundperiod):
     y = y_part(list)
 
-    minlen = 100  # min length of sample.
+    minlen = 500  # min length of sample.
     n = len(y)
 
     a = 0

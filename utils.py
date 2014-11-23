@@ -20,7 +20,7 @@ def abs(z):
     return np.sqrt(abs2(z))
 
 def write_tv_seq_to_file(data, filename):
-    f=open(filename, 'wb')
+    f = open(filename, 'wb')
     datawriter = csv.writer(f, delimiter = '\t')
     i = 0
     while i < len(data):
@@ -53,6 +53,6 @@ def power(y):
     p = 0.0
     i = 0
     while i < len(y):
-        p += y[i]*y[i]
+        p += y[i] * y[i]
         i += 1
     return np.sqrt(p / len(y))

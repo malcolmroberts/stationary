@@ -9,7 +9,7 @@ import os.path #for file-existence checking
 from cycle import *
 from utils import *
 from stats import *
-
+    
 def process_stationary_signal(start,data,round):
         # Put the y-values from the input data into y:
     y=y_part(data)
@@ -43,8 +43,14 @@ def process_stationary_signal(start,data,round):
 
     # Find all periodic components, store in the cycles array.
     # Last element of array contains remainder.
-    cycles, yleft=find_multiple_periods(y,round)
-    
+    cycles, yleft = find_multiple_periods(y,round)
+
+    i=0
+    while i < len(cycles)-1:
+        print "Period length " +str(cycles[i][0]) + " has power " +str(power(cycles[i][1]))
+        i += 1
+    print "Non-periodic part of signal has power " +str(power(cycles[i][1]))
+
     # Compute the autocorrelation and normalize
     write_y_to_file(yleft,"data.np",start)
 
@@ -141,8 +147,10 @@ def main(argv):
     # Write the input to file.
     write_tv_seq_to_file(data,"data.in")
 
+    print "power of input: " +(str(power(y_part(data))))
+
     # Consider only the stationary part of the data:
-    start=stationary_part(data,stest,p)
+    start = stationary_part(data,stest,p)
 
     # Write the period length to a file for use with latex.
     f = open('tex/def_start.tex', 'w')
@@ -158,7 +166,7 @@ def main(argv):
         print "Signal is non-stationary."
     else:
         print "Stationarity starts at "+str(start)+ " of "+str(len(data)) + " points ("+str((100.0*start)/len(data))+" %)"
-        data=data[start:len(data)]
+        data = data[start:len(data)]
         write_tv_seq_to_file(data,"data.stat")
         process_stationary_signal(start,data,round)
 

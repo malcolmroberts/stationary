@@ -47,3 +47,12 @@ def write_abs_y_to_file(Y,filename):
         datawriter.writerow([i,np.abs(Y[i])])
         i += 1
     f.close()
+
+# Return the L2 norm of the series y.
+def power(y):
+    p = 0.0
+    i=0
+    while i < len(y):
+        p += y[i]*y[i]
+        i += 1
+    return np.sqrt(p/len(y))

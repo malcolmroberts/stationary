@@ -1,32 +1,29 @@
 import graph;
 size(40cm,10cm,false);
 
-real[] ay;
+void drawbar(real x, real y, pen p=defaultpen, pen f=invisible) {
+  real w = 1.0 / 3.0;
+  pair p0 = (x - w, 0);
+  pair p1 = (x + w, 0);
+  pair p2 = (x + w, y);
+  pair p3 = (x - w, y);
+  filldraw(p0--p1--p2--p3--cycle, f, p);
+}
+
+// offset for placement of sp text
+real offset = 0.005;
+
+// end of warmup from the observations
+real[] sobs;
 {
   file fin = input("output.csv").line();
   real[][] a = fin.dimension(0, 0);
   a = transpose(a);
   //write(a[0].length);
-  ay = a[1];
+  sobs = a[1];
 }
 
-real[] ax = sequence(ay.length);
-
-draw(graph(ax, ay), invisible);
-
-void drawbar(real x, real y, pen p=defaultpen, pen f=invisible) {
-  real w = 1.0/3.0;
-  pair p0 = (x - w, 0);
-  pair p1 = (x + w, 0);
-  pair p2 = (x + w, y);
-  pair p3 = (x - w, y);
-
-  filldraw(p0--p1--p2--p3--cycle,f,p);
-}
-  
-
-real offset = 0.005;
-
+// presence of periodicity as per observations
 real[] pobs;
 {
   file fpref = input("np.csv").line();
@@ -35,28 +32,34 @@ real[] pobs;
   pobs = prr[0];
 }
 
-for(int i = 0; i < ay.length; ++i) {
-  drawbar(ax[i], ay[i], red, red + opacity(0.25));
-  if(ay[i] >= 0) {
+real[] x = sequence(sobs.length);
+
+// draw an invisible graph to set up the axes
+draw(graph(x, sobs), invisible);
+
+for(int i = 0; i < sobs.length; ++i) {
+  drawbar(x[i], sobs[i], red, red + opacity(0.25));
+  if(sobs[i] >= 0) {
     if(pobs[i] > 0)
-      label("\small{sp}",(ax[i], ay[i]), offset * NW, red);
+      label("\small{sp}",(x[i], sobs[i]), offset * NW, red);
     else
-      label("\small{s}",(ax[i], ay[i]), offset * NW, red);
+      label("\small{s}",(x[i], sobs[i]), offset * NW, red);
   }
 }
 
-real[] by;
+// reference end of warmup
+real[] wref;
 {
   file fref = input("ref.csv").line();
   real[][] b = fref.dimension(0, 0);
   b = transpose(b);
-  by = b[0];
+  wref = b[0];
 }
   
-real[] bx = sequence(by.length);
-draw(graph(bx, by), invisible);
+real[] rx = sequence(wref.length);
+draw(graph(rx, wref), invisible);
 
-
+// periodicity as per the excel file
 real[] pref;
 {
   file fpref = input("pref.csv").line();
@@ -65,27 +68,34 @@ real[] pref;
   pref = prr[0];
 }
 
-for(int i = 0; i < by.length; ++i) {
-  drawbar(bx[i], by[i], blue, blue + opacity(0.25));
-  if(by[i] >= 0) {
+// end of warmup as per the excel file
+real[] sref;
+{
+  file fpref = input("sref.csv").line();
+  real[][] a = fpref.dimension(0, 0);
+  a = transpose(a);
+  sref = a[0];
+}
+
+for(int i = 0; i < wref.length; ++i) {
+  drawbar(rx[i], wref[i], blue, blue + opacity(0.25));
+  if(sref[i] == 1) {
     if(pref[i] == 1)
-      label("\small{sp}",(bx[i], by[i]), offset * NE, blue);
+      label("\small{sp}",(rx[i], wref[i]), offset * NE, blue);
     else 
-      label("\small{s}", (bx[i], by[i]), offset * NE, blue);
+      label("\small{s}", (rx[i], wref[i]), offset * NE, blue);
   }
 }
 
 xaxis(BottomTop);
 
-for(int i=0; i < bx.length; ++i) {
-  label(string(i+1), bx[i], S);
+for(int i=0; i < rx.length; ++i) {
+  label(string(i+1), rx[i], S);
 }
 
-
 yaxis("Onset of stationarity", LeftRight, RightTicks);
-
-real xmean = 0.5*(min(ax[0],bx[0]) + max(ax[ax.length -1],bx[bx.length -1]));
-real ymax = max(max(ay), max(by));
-label("Comparison between detected (red) and reference (blue) onset of stationarity.",(xmean, -0.1 * ymax));
-label("The label ``s\" indicated stationarity was detected, ``sp\" indicates a periodic stationary state.",(xmean, -0.1 * ymax), 4*S);
+real xmean = 0.5 * (min(x[0],rx[0]) + max(x[x.length -1], rx[rx.length -1]));
+real ymax = max(max(sobs), max(wref));
+label("Comparison between detected (red) and reference (blue) onset of stationarity.", (xmean, -0.1 * ymax));
+label("The label ``s\" indicated stationarity was detected, ``sp\" indicates a periodic stationary state.", (xmean, -0.1 * ymax), 4 * S);
 

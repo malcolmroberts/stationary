@@ -93,7 +93,7 @@ for(int i=0; i < rx.length; ++i) {
   label(string(i+1), rx[i], S);
 }
 
-yaxis("Onset of stationarity", LeftRight, RightTicks);
+yaxis("End of warmpu period", LeftRight, RightTicks);
 real xmean = 0.5 * (min(x[0],rx[0]) + max(x[x.length -1], rx[rx.length -1]));
 real ymax = max(max(sobs), max(wref));
 label("Comparison between detected (red) and reference (blue) onset of stationarity.", (xmean, -0.1 * ymax));

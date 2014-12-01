@@ -12,3 +12,5 @@ KS test:
   bisect more?
 
 Compared windowed autocorrelation funcion?
+
+phase correction of typical cycle (make it cosine-like)

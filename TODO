@@ -14,3 +14,8 @@ KS test:
 Compared windowed autocorrelation funcion?
 
 phase correction of typical cycle (make it cosine-like)
+
+compute correlation length
+  first point past which autocorrelation is not significant?
+  length of box with height 1 with same area as autocorrelation?
+  e-halving length?

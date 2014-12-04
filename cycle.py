@@ -13,8 +13,8 @@ def linear_fit(y):
     while i < len(y):
         A += i
         B += y[i];
-        C += i*i;
-        D += i*y[i];
+        C += i * i;
+        D += i * y[i];
         i += 1
     m = (len(y) * D - A * B) / (len(y) * C - A * A);
     c = (B - m * A) / len(y);
@@ -23,10 +23,9 @@ def linear_fit(y):
     ylin = []
     i = 0
     while i < len(y):
-        ylin.append(m * i +c)
+        ylin.append(m * i + c)
         i += 1
     return ylin
-
 
 # Return the autocorrelation of the array of reals y.
 def autocorrelate(y):
@@ -270,7 +269,6 @@ def significant_cycle(yac):
         i += 1
 
     return (False)
-
 
 # Find all periods in the input data y.
 # Input: sequence y, bool round (if we're rounding to integral periods)

@@ -48,7 +48,6 @@ def process_stationary_signal(start,data,round):
     return yac, fac, cycles, yleft
 
 
-
 # Main program
 def main(argv):
     usage = "Usage:\n"\
@@ -104,32 +103,34 @@ def main(argv):
 
     # Check that the file exists (and is not a directory):
     if not (os.path.isfile(filename)):
-        print "Error: the specified file \""+filename+ " \" does not exist"
+        print "Error: the specified file \"" + filename + " \" does not exist"
         print usage
         sys.exit(2)
     else:
-        print "Analyzing "+filename
-        
+        print "Analyzing " + filename
 
     # Read the data
     data = []
-    csvReader = csv.reader(open(filename, 'rb'), delimiter='\t')
+    csvReader = csv.reader(open(filename, 'rb'), delimiter = '\t')
     for row in csvReader:
         data.append(row)
-    print str(len(data))+" data points found"
+    print str(len(data)) + " data points found"
 
     # Write the input to file.
     write_tv_seq_to_file(data,"data.in")
 
     ypower = power(y_part(data))
-    print "power of input: " +str(ypower)
+    print "power of input: " + str(ypower)
+
+    corrlen = correlation_lengt(y_part(data))
+    print "Correlation length of input is " + str(corrlen)
 
     # Consider only the stationary part of the data:
     start = stationary_part(data, stest, p, preremove_cycles, round)
 
     # Write the period length to a file for use with latex.
     f = open('tex/def_start.tex', 'w')
-    f.write("\def\startval{"+str(start)+"}")
+    f.write("\def\startval{" + str(start) + "}")
     f.close();
 
     # Output the start of stationarity for the bash script
@@ -137,6 +138,7 @@ def main(argv):
     f.write(str(start))
     f.close();
 
+    # Output for creating the summary pdf
     f = open("output", 'wb')
     f.write(str(ypower))
     f.write("\t")
@@ -147,21 +149,26 @@ def main(argv):
     if(start < 0):
         print "Signal is non-stationary."
     else:
-        print "Stationarity starts at "+str(start)+ " of "+str(len(data)) + " points ("+str((100.0*start)/len(data))+" %)"
+        print "Stationarity starts at " + str(start) +  " of " \
+            + str(len(data)) + " points (" + str((100.0*start) / len(data))\
+            +" %)"
         data = data[start:len(data)]
         write_tv_seq_to_file(data,"data.stat")
         yac, fac, cycles, yleft = process_stationary_signal(start,data,round)
     
+        corrlen = correlation_lengt(yleft)
+        print "Correlation length of remainder is " + str(corrlen)
+
         write_y_to_file(yac, "data.ac")
         write_abs_y_to_file(fac, "data.fac")
 
         i = 0
         while i < len(cycles)-1:
-            print "Period length " +str(cycles[i][0]) \
-                + " has power " +str(power(cycles[i][1]))
+            print "Period length " + str(cycles[i][0]) \
+                + " has power " + str(power(cycles[i][1]))
             i += 1
         print "Non-periodic part of signal has power "\
-            +str(power(cycles[i][1]))
+            + str(power(cycles[i][1]))
 
         # Compute the autocorrelation and normalize
         write_y_to_file(yleft,"data.np",start)
@@ -188,7 +195,7 @@ def main(argv):
         if len(periods) > 0:
             # Write the period length to a file for use with latex.
             f = open('tex/def_period.tex', 'w')
-            f.write("\def\periodlength{"+str(periods)+"}")
+            f.write("\def\periodlength{" + str(periods) + "}")
             f.close();
     
             periodpower = []
@@ -197,15 +204,13 @@ def main(argv):
                 periodpower.append(power(cycles[i][1]))
                 i += 1
             f = open('tex/def_period_power.tex', 'w')
-            f.write("\def\periodpower{"+str(periodpower)+"}")
+            f.write("\def\periodpower{" + str(periodpower) + "}")
             f.close();
         
         # Write number of periods to file
         f = open('nperiods', 'w')
         f.write(str(len(periods)))
         f.close();
-
-
 
 # The main program is called from here
 if __name__ == "__main__":

@@ -8,6 +8,36 @@ import scipy.stats # Science!
 
 from utils import *
 
+# Return the correlation length of the sequence of floats y.
+def correlation_lengt(y):
+    yac = autocorrelate(y)
+    yac = normalize_by_first(yac)
+    n = len(yac)
+    # 95% confidence interval for autocorrelation
+    ac95 = 1.96 / np.sqrt(n)
+   
+    wittetal = False
+
+    if(wittetal):
+        i = n
+        while i >= 0:
+            i -= 1
+            #ac95 = (-1 + 1.96 * np.sqrt(n - i - 1))/(n-i)
+            if np.abs(yac[i]) > ac95:
+                return i
+        return 0
+    else: 
+        area = 0.0
+        i = 0
+        while i < n:
+            area += np.abs(yac[i])
+            if yac[i] < ac95:
+                return i-1
+                #return area / 1.0
+            i += 1
+    #return area / 1.0
+    return n
+
 def stationary_part(list, stest, p, rmcycles, roundperiod):
     y = y_part(list)
 
@@ -38,8 +68,11 @@ def stationary_part(list, stest, p, rmcycles, roundperiod):
         # consider the signal stationary
         if(power(ytest) / ytestpow < 1e-12):
             return a
-        
 
+        corrlen = correlation_lengt(ytest)
+        print "Correlation length of ytest is " + str(corrlen)
+        print len(ytest)
+        
         good = is_stationary(ytest, stest, p, minlen)
 
         if good:

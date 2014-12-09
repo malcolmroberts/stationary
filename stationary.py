@@ -122,7 +122,7 @@ def main(argv):
     ypower = power(y_part(data))
     print "power of input: " + str(ypower)
 
-    corrlen = correlation_lengt(y_part(data))
+    corrlen = correlation_length(y_part(data))
     print "Correlation length of input is " + str(corrlen)
 
     # Consider only the stationary part of the data:
@@ -156,7 +156,7 @@ def main(argv):
         write_tv_seq_to_file(data,"data.stat")
         yac, fac, cycles, yleft = process_stationary_signal(start,data,round)
     
-        corrlen = correlation_lengt(yleft)
+        corrlen = correlation_length(yleft)
         print "Correlation length of remainder is " + str(corrlen)
 
         write_y_to_file(yac, "data.ac")

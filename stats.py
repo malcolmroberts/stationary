@@ -9,7 +9,7 @@ import scipy.stats # Science!
 from utils import *
 
 # Return the correlation length of the sequence of floats y.
-def correlation_lengt(y):
+def correlation_length(y):
     yac = autocorrelate(y)
     yac = normalize_by_first(yac)
     n = len(yac)
@@ -17,6 +17,7 @@ def correlation_lengt(y):
     ac95 = 1.96 / np.sqrt(n)
    
     wittetal = False
+    #wittetal = True
 
     if(wittetal):
         i = n
@@ -69,7 +70,7 @@ def stationary_part(list, stest, p, rmcycles, roundperiod):
         if(power(ytest) / ytestpow < 1e-12):
             return a
 
-        corrlen = correlation_lengt(ytest)
+        corrlen = correlation_length(ytest)
         print "Correlation length of ytest is " + str(corrlen)
         print len(ytest)
         

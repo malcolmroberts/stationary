@@ -67,7 +67,7 @@ def normalize_by_first(y):
 # Return the max of the quadratic spline going through three equally
 # spaced points with y-values y0, y1, and y2.
 def paramax(y0, y1, y2):
-    if(np.abs(y0) > 0 and np.abs(y1) > 0 and np.abs(y2) > 0): 
+    if(np.abs(y0) > 0 and np.abs(y1) > 0 and np.abs(y2) > 0):
         return 0.5 * (y0 - y2) / (y0 - 2 * y1 +y2)
     return 0
 
@@ -201,7 +201,7 @@ def typical_cycle(period, y):
     return ytyp
 
 # FIXME: add documentation
-def rm_typical_cycle(period,y,ytyp):
+def rm_typical_cycle(period, y, ytyp):
     newy = []
     i = 0
     while i < len(y):

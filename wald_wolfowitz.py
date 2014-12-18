@@ -66,8 +66,8 @@ def updown(y):
     return updown
 
 def count_uniques(y):
-    vals = []
     counts = []
+    vals = []
     i = 0
     while(i < len(y)):
         j = 0

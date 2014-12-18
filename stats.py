@@ -4,39 +4,67 @@ import random
 import numpy as np
 from cycle import *
 
+# from the current repo
+from wald_wolfowitz import *
+
 import scipy.stats # Science!
 
 from utils import *
+
+def bin_sequence(y, binlen):
+    nbins = len(y) / binlen
+    ybins = []
+    i = 0
+    while(i < nbins):
+        ybins.append(0)
+        j = 0
+        while(j < binlen):
+            ybins[i] += y[i * binlen + j]
+            j += 1
+        ybins[i] /= binlen
+        i += 1
+    return ybins
 
 # Return the correlation length of the sequence of floats y.
 def correlation_length(y):
     yac = autocorrelate(y)
     yac = normalize_by_first(yac)
     n = len(yac)
+
     # 95% confidence interval for autocorrelation
     ac95 = 1.96 / np.sqrt(n)
-   
+
     wittetal = False
-    #wittetal = True
+
+    firstcross = False
+
+    acarea = True
 
     if(wittetal):
         i = n
         while i >= 0:
             i -= 1
-            #ac95 = (-1 + 1.96 * np.sqrt(n - i - 1))/(n-i)
+            #ac95 = (-1 + 1.96 * np.sqrt(n - i - 1)) / (n-i)
             if np.abs(yac[i]) > ac95:
                 return i
         return 0
-    else: 
-        area = 0.0
-        i = 0
+
+    if(firstcross):
+        i = 1
         while i < n:
-            area += np.abs(yac[i])
+            ac95 = (-1 + 1.96 * np.sqrt(n - i - 1)) / (n-i)
             if yac[i] < ac95:
-                return i-1
-                #return area / 1.0
+                return i - 1
             i += 1
-    #return area / 1.0
+
+    if(acarea):
+        area = 0
+        i = 1
+        while np.abs(yac[i]) < ac95:
+            area += yac[i]
+            i += 1
+        return area / 1.0
+
     return n
 
 def stationary_part(list, stest, p, rmcycles, roundperiod):
@@ -57,22 +85,15 @@ def stationary_part(list, stest, p, rmcycles, roundperiod):
             return -1
 
         alast = a
-        
-
         ytest = y[a:n]
-        ytestpow = power(ytest)
 
+        ytestpow = power(ytest)
         if(rmcycles == True):
             cycles, ytest = find_multiple_periods(ytest, roundperiod)
-         
-        # if the non-periodic part of the signal is negligible,
+        # If the non-periodic part of the signal is negligible,
         # consider the signal stationary
         if(power(ytest) / ytestpow < 1e-12):
             return a
-
-        corrlen = correlation_length(ytest)
-        print "Correlation length of ytest is " + str(corrlen)
-        print len(ytest)
         
         good = is_stationary(ytest, stest, p, minlen)
 
@@ -95,19 +116,16 @@ def stationary_part(list, stest, p, rmcycles, roundperiod):
 
 def is_stationary(y, stest, p_crit, minlen):
     n = len(y)
-
-    #cycles, y=find_multiple_periods(y,round)
-
-    h = int(np.floor(n / 2))
-    y0 = y[0:h]
-    y1 = y[n-h:n]
-
-    random.shuffle(y0)
-    random.shuffle(y1)
-
     p = -1
 
     if stest == "wsr":
+        h = int(np.floor(n / 2))
+        y0 = y[0:h]
+        y1 = y[n-h:n]
+        
+        random.shuffle(y0)
+        random.shuffle(y1)
+
         repeats, nr = scipy.stats.find_repeats(y)
         ni = n
         i = 0
@@ -118,8 +136,38 @@ def is_stationary(y, stest, p_crit, minlen):
             p = 1 # we call this stationary
         else :
             T , p = scipy.stats.wilcoxon(y0, y1)
+
     if stest == "ks":
+        h = int(np.floor(n / 2))
+        y0 = y[0:h]
+        y1 = y[n-h:n]
         D, p = scipy.stats.ks_2samp(y0, y1)
+
+    if stest == "runs":
+        clen = correlation_length(y)
+        ybins = bin_sequence(y, int(round(clen)) + 1)
+        print len(ybins)
+        if(len(ybins) < 2):
+           return False
+        mean = float(sum(ybins)) / len(ybins)
+        x = highlow(ybins, mean) # is the mean a good fit for the data?
+        counts, vals = count_uniques(x)
+        if(len(vals) == 1):
+            return True # a constant sequence is stationary
+        if(len(vals) != 2):
+            print "Error: runs test is considering " + str(len(vals)) \
+                + " different values: cannore be more than two!"
+            print vals
+            exit(1)
+        if(max(counts[0], counts[1]) < 10):
+            return False
+
+        Z = wald_wolfowitz(x)
+        print Z
+        if(np.abs(Z) > 1.96):
+            return False
+        else:
+            return True
 
     # requires 0.14 of scipy
     #A2, critical, p = scipy.stats.anderson_ksamp([y0,y1])
@@ -127,9 +175,6 @@ def is_stationary(y, stest, p_crit, minlen):
     if(p == -1):
         print "Error: invalid choice of statistical test "+stest
         exit(1)
-
-
-    #print p
 
     if (p > p_crit):
         # Null hypothesis likely: same dist, so steady 

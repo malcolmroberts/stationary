@@ -6,11 +6,12 @@ import sys # to check for file existence, etc.
 import getopt # to pass command-line arguments
 import os.path #for file-existence checking
 
+# Load files in this repository
 from cycle import *
 from utils import *
 from stats import *
-    
-def process_stationary_signal(start,data,round):
+
+def process_stationary_signal(start, data, round):
     # Put the y-values from the input data into y:
     y = y_part(data)
 
@@ -26,8 +27,8 @@ def process_stationary_signal(start,data,round):
         i += 1
 
     # # Remove the linear fit:
-    # ylin=linear_fit(y)
-    # i=0
+    # ylin = linear_fit(y)
+    # i = 0
     # while i < len(y):
     #     y[i] -= ylin[i]
     #     i += 1
@@ -38,7 +39,7 @@ def process_stationary_signal(start,data,round):
     #write_y_to_file(yac, "data.ac")
 
     # The FFT of the autocorrelation
-    fac=np.fft.rfft(yac)
+    fac = np.fft.rfft(yac)
     write_abs_y_to_file(fac, "data.fac")
 
     # Find all periodic components, store in the cycles array.
@@ -52,26 +53,28 @@ def process_stationary_signal(start,data,round):
 def main(argv):
     usage = "Usage:\n"\
         "./stationary\n"\
-        "\t-f <filename> input filename\n"\
-        "\t-r <0 or 1 (default)>  round period to nearest ineteger?\n"\
-        "\t-s <ks (default), wsr>\ statistical test\n"\
-        "\t-p <real, defaul=0.1>\ specify p-value for stationarity\n"\
-        "\t-c <0 or 1 (default)>  Remove period before testing for stationairty\n"\
+        "\t-f <filename> Input filename.\n"\
+        "\t-r <0 or 1 (default)> Round period to nearest ineteger?\n"\
+        "\t-s <ks (default), wsr, runs>\ Choice of statistical test.\n"\
+        "\t-p <real, defaul=0.1>\ Specify p-value for stationarity.\n"\
+        "\t-c <0 or 1 (default=1)> Remove cycles before testing for stationairty.\n"\
+        "\t-t <0 or 1 (default=0)> Create ouput files for tex.\n"\
         "\t-h display help message\n"
 
     # Filename for the input data (consisting of tab-separated
     # (time,value) pairs.
-    filename=""
+    filename = ""
 
     preremove_cycles = True
     round = True
     #round=False
     p = 0.1
-    stest="ks"
+    stest = "ks"
+    texoutput = False
 
     # Load the command-line arguments
     try:
-        opts, args = getopt.getopt(argv,"c:f:r:p:s:")
+        opts, args = getopt.getopt(argv,"c:f:r:p:s:t:")
     except getopt.GetoptError:
         print usage
         sys.exit(2)
@@ -79,15 +82,17 @@ def main(argv):
         if opt in ("-p"):
             p = float(arg)
         if opt in ("-s"):
-            stest=arg
+            stest = arg
         if opt in ("-f"):
             filename = arg
         if opt in ("-r"):
             round = (arg == "True" or arg == "true" or arg == "1")
         if opt in ("-c"):
             preremove_cycles = (arg == "True" or arg == "true" or arg == "1")
+        if opt in ("-t"):
+            texoutput = (arg == "True" or arg == "true" or arg == "1")
 
-    print "Using "+stest+ " statistical test with p="+str(p)
+    print "Using " + stest + " statistical test with p = " + str(p)
 
     if round:
         print "Period lengths are rounded."
@@ -117,10 +122,10 @@ def main(argv):
     print str(len(data)) + " data points found"
 
     # Write the input to file.
-    write_tv_seq_to_file(data,"data.in")
+    write_tv_seq_to_file(data, "data.in")
 
     ypower = power(y_part(data))
-    print "power of input: " + str(ypower)
+    print "Power of input signal: " + str(ypower)
 
     corrlen = correlation_length(y_part(data))
     print "Correlation length of input is " + str(corrlen)
@@ -128,23 +133,25 @@ def main(argv):
     # Consider only the stationary part of the data:
     start = stationary_part(data, stest, p, preremove_cycles, round)
 
-    # Write the period length to a file for use with latex.
-    f = open('tex/def_start.tex', 'w')
-    f.write("\def\startval{" + str(start) + "}")
-    f.close();
+    if(texoutput):
+        # Write the period length to a file for use with latex.
+        f = open('tex/def_start.tex', 'w')
+        f.write("\def\startval{" + str(start) + "}")
+        f.close();
 
-    # Output the start of stationarity for the bash script
-    f = open('startval', 'w')
-    f.write(str(start))
-    f.close();
+        # Output the start of stationarity for the bash script for the
+        # asy figures
+        f = open('startval', 'w')
+        f.write(str(start))
+        f.close();
 
-    # Output for creating the summary pdf
-    f = open("output", 'wb')
-    f.write(str(ypower))
-    f.write("\t")
-    f.write(str(start))
-    f.write("\t")
-    f.close()
+        # Output for creating the summary pdf
+        f = open("output", 'wb')
+        f.write(str(ypower))
+        f.write("\t")
+        f.write(str(start))
+        f.write("\t")
+        f.close()
 
     if(start < 0):
         print "Signal is non-stationary."
@@ -153,8 +160,8 @@ def main(argv):
             + str(len(data)) + " points (" + str((100.0*start) / len(data))\
             +" %)"
         data = data[start:len(data)]
-        write_tv_seq_to_file(data,"data.stat")
-        yac, fac, cycles, yleft = process_stationary_signal(start,data,round)
+        write_tv_seq_to_file(data, "data.stat")
+        yac, fac, cycles, yleft = process_stationary_signal(start, data, round)
     
         corrlen = correlation_length(yleft)
         print "Correlation length of remainder is " + str(corrlen)
@@ -170,10 +177,8 @@ def main(argv):
         print "Non-periodic part of signal has power "\
             + str(power(cycles[i][1]))
 
-        # Compute the autocorrelation and normalize
-        write_y_to_file(yleft,"data.np",start)
+        write_y_to_file(yleft, "data.np", start)
 
-        #print "Detected period: "+str(period)
         periods = []
         i = 0
         while i < len(cycles)-1:
@@ -182,35 +187,36 @@ def main(argv):
             write_y_to_file(cycles[i][1], "data.ytyp" + str(i))
             i += 1
 
-        # Output the number of periods for the bash script
-        f = open('nperiods', 'w')
-        f.write(str(len(periods)))
-        f.close();
+        if(texoutput):
+            # Output the number of periods for the bash script
+            f = open('nperiods', 'w')
+            f.write(str(len(periods)))
+            f.close();
 
-        # Output the number of periods for the tex file
-        f = open('tex/def_nperiods.tex', 'w')
-        f.write("\def\\nperiods{" + str(len(periods)) + "}")
-        f.close();
-    
-        if len(periods) > 0:
-            # Write the period length to a file for use with latex.
-            f = open('tex/def_period.tex', 'w')
-            f.write("\def\periodlength{" + str(periods) + "}")
+            # Output the number of periods for the tex file
+            f = open('tex/def_nperiods.tex', 'w')
+            f.write("\def\\nperiods{" + str(len(periods)) + "}")
             f.close();
     
-            periodpower = []
-            i = 0
-            while i < len(periods):
-                periodpower.append(power(cycles[i][1]))
-                i += 1
-            f = open('tex/def_period_power.tex', 'w')
-            f.write("\def\periodpower{" + str(periodpower) + "}")
+            if len(periods) > 0:
+                # Write the period length to a file for use with latex.
+                f = open('tex/def_period.tex', 'w')
+                f.write("\def\periodlength{" + str(periods) + "}")
+                f.close();
+    
+                periodpower = []
+                i = 0
+                while i < len(periods):
+                    periodpower.append(power(cycles[i][1]))
+                    i += 1
+                f = open('tex/def_period_power.tex', 'w')
+                f.write("\def\periodpower{" + str(periodpower) + "}")
+                f.close();
+            
+            # Write number of periods to file
+            f = open('nperiods', 'w')
+            f.write(str(len(periods)))
             f.close();
-        
-        # Write number of periods to file
-        f = open('nperiods', 'w')
-        f.write(str(len(periods)))
-        f.close();
 
 # The main program is called from here
 if __name__ == "__main__":

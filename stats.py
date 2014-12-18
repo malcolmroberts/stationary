@@ -60,7 +60,7 @@ def correlation_length(y):
     if(acarea):
         area = 0
         i = 1
-        while np.abs(yac[i]) < ac95:
+        while(i < n and np.abs(yac[i]) < ac95):
             area += yac[i]
             i += 1
         return area / 1.0
@@ -146,9 +146,9 @@ def is_stationary(y, stest, p_crit, minlen):
     if stest == "runs":
         clen = correlation_length(y)
         ybins = bin_sequence(y, int(round(clen)) + 1)
-        print len(ybins)
         if(len(ybins) < 2):
            return False
+
         mean = float(sum(ybins)) / len(ybins)
         x = highlow(ybins, mean) # is the mean a good fit for the data?
         counts, vals = count_uniques(x)
@@ -163,7 +163,6 @@ def is_stationary(y, stest, p_crit, minlen):
             return False
 
         Z = wald_wolfowitz(x)
-        print Z
         if(np.abs(Z) > 1.96):
             return False
         else:

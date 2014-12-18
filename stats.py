@@ -1,10 +1,12 @@
 # Do stationarity tests on a list or (time,value) pairs and return the
 # stationary tail.
+
 import random
 import numpy as np
-from cycle import *
 
-# from the current repo
+
+# From the current repo:
+from cycle import *
 from wald_wolfowitz import *
 
 import scipy.stats # Science!
@@ -38,7 +40,13 @@ def correlation_length(y):
 
     firstcross = False
 
-    acarea = True
+    acarea = False
+
+    acabsarea = False
+
+    totacarea = False
+
+    totacabsarea = True
 
     if(wittetal):
         i = n
@@ -62,6 +70,30 @@ def correlation_length(y):
         i = 1
         while(i < n and np.abs(yac[i]) < ac95):
             area += yac[i]
+            i += 1
+        return area / 1.0
+
+    if(acabsarea):
+        area = 0
+        i = 1
+        while(i < n and np.abs(yac[i]) < ac95):
+            area += abs(yac[i])
+            i += 1
+        return area / 1.0
+
+    if(totacarea):
+        area = 0
+        i = 1
+        while(i < n):
+            area += yac[i]
+            i += 1
+        return area / 1.0
+
+    if(totacabsarea):
+        area = 0
+        i = 1
+        while(i < n):
+            area += abs(yac[i])
             i += 1
         return area / 1.0
 

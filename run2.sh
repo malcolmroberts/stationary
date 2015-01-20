@@ -2,17 +2,18 @@
 
 # run ./run.sh and make the associated latex file.
 # usage: 
-# ./run2.sh <input filename> <bool for whether to round or not>
+# ./run2.sh <input filename> <bool for whether to round or not> <stats> <p>
 
 if [ "$1" != "" ]; then
 
     ./run.sh $1 $2 $3 $4
 
-    echo "\def\filename{$1}" > tex/defrun.tex
+    #echo "\def\filename{$1}" > tex/defrun.tex
     
     cd tex
     echo "running latex..."
     latexmk -pdf transforms &> /dev/null
+    #latexmk -pdf transforms
     echo "   done."
     cd -
     

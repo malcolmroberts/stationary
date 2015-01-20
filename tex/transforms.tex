@@ -45,7 +45,7 @@
 
 \input{defrun.tex}
 %\def\filename{perfectsine}
-
+%f.write("\def\\method{" + stest + "}")
 
 %\input{def_a.tex}
 %\def\aval{500}
@@ -53,6 +53,7 @@
 %\def\bval{500}
 
 \input{def_start.tex}
+\input{def_corlen.tex}
 
 \newcounter{start}
 \defcounter{start}{\startval}
@@ -73,12 +74,14 @@
 
 %\section{Introduction}
 Input file: \texttt{\filename}. %
+Statistical test: \smethod. %
 \ifbool{stationary}%
        {Stationarity starts at \startval{}.\ifbool{periodic}%
        {The steady state is periodic.}%
        {The steady state is not periodic.}
 }%
-       {No stationarity detected.} %
+       {No stationarity detected.} 
+The correlation length of the input is \corrlen{}.
 
 \begin{figure}[htbp]
   \begin{center}        
@@ -107,13 +110,15 @@ Input file: \texttt{\filename}. %
   \ifbool{periodic}{
     \input{def_period.tex}  
     \input{def_period_power.tex}  
+
     \begin{figure}[htbp]
-      \begin{center}        
+      \begin{center}
         \includegraphics{../data_typ}
         \caption{Detected typical cycles with periods in
           \periodlength{} with power \periodpower{}.}
       \end{center}
     \end{figure}
+
     \begin{figure}[htbp]
       \begin{center}        
         \includegraphics{../data_np}

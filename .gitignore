@@ -9,11 +9,10 @@ tex/*.aux
 tex/*.fls
 *.pdf
 *.eps
-tex/def_a.tex
-tex/def_b.tex
-tex/def_period.tex
-tex/defrun.tex
+tex/def*
 *.pyc
 ref
 inputs
 cinpu*
+data*
+log

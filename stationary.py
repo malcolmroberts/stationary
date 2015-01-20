@@ -55,7 +55,7 @@ def main(argv):
         "./stationary\n"\
         "\t-f <filename> Input filename.\n"\
         "\t-r <0 or 1 (default)> Round period to nearest ineteger?\n"\
-        "\t-s <ks (default), wsr, runs>\ Choice of statistical test.\n"\
+        "\t-s <ks (default), wsr, runs> Choice of statistical test.\n"\
         "\t-p <real, defaul=0.1>\ Specify p-value for stationarity.\n"\
         "\t-c <0 or 1 (default=1)> Remove cycles before testing for stationairty.\n"\
         "\t-t <0 or 1 (default=0)> Create ouput files for tex.\n"\
@@ -91,6 +91,7 @@ def main(argv):
             preremove_cycles = (arg == "True" or arg == "true" or arg == "1")
         if opt in ("-t"):
             texoutput = (arg == "True" or arg == "true" or arg == "1")
+            print "texoutput: " + str(texoutput)
 
     print "Using " + stest + " statistical test with p = " + str(p)
 
@@ -135,6 +136,12 @@ def main(argv):
 
     if(texoutput):
         # Write the period length to a file for use with latex.
+        f = open('tex/defrun.tex', 'w')
+        f.write("\def\\filename{" + filename + "}\n")
+        f.write("\def\\smethod{" + stest + "}")
+        f.close();
+
+        # Write the period length to a file for use with latex.
         f = open('tex/def_start.tex', 'w')
         f.write("\def\startval{" + str(start) + "}")
         f.close();
@@ -152,6 +159,18 @@ def main(argv):
         f.write(str(start))
         f.write("\t")
         f.close()
+
+        # Write the correlation length to a file for use with latex.
+        f = open('tex/def_corlen.tex', 'w')
+        f.write("\def\corrlen{" + str(corrlen) + "}")
+        f.close();
+
+        # Output the number of periods for the tex file
+        # NB: overwritten if periods are actually found
+        f = open('tex/def_nperiods.tex', 'w')
+        f.write("\def\\nperiods{" + str(0) + "}")
+        f.close();
+
 
     if(start < 0):
         print "Signal is non-stationary."

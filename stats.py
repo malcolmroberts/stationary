@@ -175,12 +175,11 @@ def is_stationary(y, stest, p_crit, minlen):
         y1 = y[n-h:n]
         D, p = scipy.stats.ks_2samp(y0, y1)
 
-    if stest == "highlowruns" or "updownruns":
+    if stest == "highlowruns" or stest == "updownruns":
         clen = correlation_length(y)
         ybins = bin_sequence(y, int(round(clen)) + 1)
         if(len(ybins) < 2):
            return False
-
 
         x = []
         if stest == "highlowruns":
@@ -234,46 +233,36 @@ def bindata(y, N):
         i += 1
     return z
 
-def runningmean(z):
-    zbar = []
-    i = 0
-    while(i < len(z)):
-        zbar.append(0.0)
-        j = i
-        while(j < len(z)):
-            zbar[i] += z[j]
-            j += 1
-        zbar[i] /= (len(z) - i)
-        i += 1
-    return zbar
 
-def runningstdev2(z, zbar):
-    Sz2 = []
+def variance(z):
+    zbar = 0
     i = 0
     while(i < len(z)):
-        Sz2.append(0.0)
-        j = i
-        while(j < len(z)):
-            d = (z[j] - zbar[j])
-            Sz2[i] += d * d;
-            j += 1
-        Sz2[i] /= (len(z) - i)
+        zbar += z[i]
         i += 1
-    return Sz2
+    zbar /= len(z)
+    var = 0
+    i = 0
+    while(i < len(z)):
+        d = zbar - z[i]
+        var += d * d
+        i += 1
+    var /= len(z)
+    return var
 
 def mser5(y):
     N = 5 # size of bins
     z = bindata(y, N)
-    zbar = runningmean(z)
-    Sz2 = runningstdev2(z, zbar)
     dstar = -1
-    d = 0
     vmin = sys.float_info.max
-    while(d < len(Sz2)):
-        val = Sz2[d] / (len(Sz2) - d)
+    nw = len(z)
+    d = 0
+    while(d < len(z)):
+        val = variance(z[d:nw]) / (nw - d)
         if(val < vmin):
-            val = vmin
+            vmin = val
             dstar = d
         d += 1
+    print vmin
     return dstar * N
 

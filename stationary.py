@@ -55,7 +55,7 @@ def main(argv):
         "./stationary\n"\
         "\t-f <filename> Input filename.\n"\
         "\t-r <0 or 1 (default)> Round period to nearest ineteger?\n"\
-        "\t-s <ks (default), wsr, runs> Choice of statistical test.\n"\
+        "\t-s <ks (default), wsr, updownruns, highlowruns> Choice of statistical test.\n"\
         "\t-p <real, defaul=0.1>\ Specify p-value for stationarity.\n"\
         "\t-c <0 or 1 (default=1)> Remove cycles before testing for stationairty.\n"\
         "\t-t <0 or 1 (default=0)> Create ouput files for tex.\n"\

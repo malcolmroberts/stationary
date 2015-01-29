@@ -3,7 +3,7 @@
 
 import random
 import numpy as np
-
+import sys
 
 # From the current repo:
 from cycle import *
@@ -175,14 +175,21 @@ def is_stationary(y, stest, p_crit, minlen):
         y1 = y[n-h:n]
         D, p = scipy.stats.ks_2samp(y0, y1)
 
-    if stest == "runs":
+    if stest == "highlowruns" or "updownruns":
         clen = correlation_length(y)
         ybins = bin_sequence(y, int(round(clen)) + 1)
         if(len(ybins) < 2):
            return False
 
-        mean = float(sum(ybins)) / len(ybins)
-        x = highlow(ybins, mean) # is the mean a good fit for the data?
+
+        x = []
+        if stest == "highlowruns":
+            mean = float(sum(ybins)) / len(ybins)
+            x = highlow(ybins, mean) # is the mean a good fit for the data?
+
+        if stest == "updownruns":
+            x = updown(ybins) # is the mean a good fit for the data?
+
         counts, vals = count_uniques(x)
         if(len(vals) == 1):
             return True # a constant sequence is stationary
@@ -212,3 +219,61 @@ def is_stationary(y, stest, p_crit, minlen):
         return True
     else: 
         return False
+
+def bindata(y, N):
+    z = []
+    n = int(np.floor(len(y) / N)) # number of bins
+    i = 0    
+    while(i < n):
+        z.append(0.0)
+        j = 0
+        while(j < N):
+            z[i] += y[N * i + j]
+            j += 1
+        z[i] /= N
+        i += 1
+    return z
+
+def runningmean(z):
+    zbar = []
+    i = 0
+    while(i < len(z)):
+        zbar.append(0.0)
+        j = i
+        while(j < len(z)):
+            zbar[i] += z[j]
+            j += 1
+        zbar[i] /= (len(z) - i)
+        i += 1
+    return zbar
+
+def runningstdev2(z, zbar):
+    Sz2 = []
+    i = 0
+    while(i < len(z)):
+        Sz2.append(0.0)
+        j = i
+        while(j < len(z)):
+            d = (z[j] - zbar[j])
+            Sz2[i] += d * d;
+            j += 1
+        Sz2[i] /= (len(z) - i)
+        i += 1
+    return Sz2
+
+def mser5(y):
+    N = 5 # size of bins
+    z = bindata(y, N)
+    zbar = runningmean(z)
+    Sz2 = runningstdev2(z, zbar)
+    dstar = -1
+    d = 0
+    vmin = sys.float_info.max
+    while(d < len(Sz2)):
+        val = Sz2[d] / (len(Sz2) - d)
+        if(val < vmin):
+            val = vmin
+            dstar = d
+        d += 1
+    return dstar
+

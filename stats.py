@@ -275,5 +275,5 @@ def mser5(y):
             val = vmin
             dstar = d
         d += 1
-    return dstar
+    return dstar * N
 

@@ -266,3 +266,36 @@ def mser5(y):
     print vmin
     return dstar * N
 
+
+def mae(z):
+    zbar = 0
+    i = 0
+    while(i < len(z)):
+        zbar += z[i]
+        i += 1
+    zbar /= len(z)
+    var = 0
+    i = 0
+    while(i < len(z)):
+        d = np.abs(zbar - z[i])
+        var += d
+        i += 1
+    var /= len(z)
+    return var
+
+def maer5(y):
+    N = 5 # size of bins
+    z = bindata(y, N)
+    dstar = -1
+    vmin = sys.float_info.max
+    nw = len(z)
+    d = 0
+    while(d < len(z)):
+        val = mae(z[d:nw]) / (nw - d)
+        if(val < vmin):
+            vmin = val
+            dstar = d
+        d += 1
+    print vmin
+    return dstar * N
+

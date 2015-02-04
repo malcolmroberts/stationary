@@ -122,12 +122,14 @@ def stationary_part(list, stest, p, rmcycles, roundperiod):
         ytestpow = power(ytest)
         if(rmcycles == True):
             cycles, ytest = find_multiple_periods(ytest, roundperiod)
-        # If the non-periodic part of the signal is negligible,
-        # consider the signal stationary
-        if(power(ytest) / ytestpow < 1e-12):
-            return a
-        
-        good = is_stationary(ytest, stest, p, minlen)
+            # If the non-periodic part of the signal is negligible,
+            # consider the signal stationary
+            if(power(ytest) / ytestpow < 1e-12):
+                good = True
+            else: 
+                good = is_stationary(ytest, stest, p, minlen)
+        else:
+            good = is_stationary(ytest, stest, p, minlen)
 
         if good:
             high = a

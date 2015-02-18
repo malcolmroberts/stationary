@@ -152,14 +152,6 @@ def main(argv):
         f.write(str(start))
         f.close();
 
-        # Output for creating the summary pdf
-        f = open("output", 'wb')
-        f.write(str(ypower))
-        f.write("\t")
-        f.write(str(start))
-        f.write("\t")
-        f.close()
-
         # Write the correlation length to a file for use with latex.
         f = open('tex/def_corlen.tex', 'w')
         f.write("\def\corrlen{" + str(corrlen) + "}")
@@ -217,11 +209,18 @@ def main(argv):
             f.write("\def\\nperiods{" + str(len(periods)) + "}")
             f.close();
     
+            f = open('period_length.csv', 'w')
+            if len(periods) == 0:
+                f.write(str(0))
+            else:
+                f.write(str(periods[0]))
+            f.close()
+
             if len(periods) > 0:
                 # Write the period length to a file for use with latex.
                 f = open('tex/def_period.tex', 'w')
                 f.write("\def\periodlength{" + str(periods) + "}")
-                f.close();
+                f.close()
     
                 periodpower = []
                 i = 0
@@ -230,7 +229,7 @@ def main(argv):
                     i += 1
                 f = open('tex/def_period_power.tex', 'w')
                 f.write("\def\periodpower{" + str(periodpower) + "}")
-                f.close();
+                f.close()
             
             # Write number of periods to file
             f = open('nperiods', 'w')

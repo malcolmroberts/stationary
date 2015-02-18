@@ -15,23 +15,21 @@ real offset = 0.005;
 
 // end of warmup from the observations
 real[] sobs;
-{
-  file f = input("start_of_stationarity.csv").line();
-  real[][] a = f.dimension(0, 0);
-  a = transpose(a);
-  //write(a[0].length);
-  sobs = a[0];
-}
-
 // presence of periodicity as per observations
 real[] pobs;
 {
-  file f = input("num_periods.csv").line();
-  real[][] prr = f.dimension(0, 0);
-  prr = transpose(prr);
-  pobs = prr[0];
+  string filename;
+  filename = getstring("FSfilename");
+  
+  file f = input(filename).line();
+  real[][] a = f.dimension(0, 0);
+  a = transpose(a);
+  for(int i = 0; i < 62; ++i) {
+    sobs.push(a[18][i]); // S #TailStart
+    pobs.push(a[17][i] > 1 ? 1 : 0); // R #CycleLength
+  }
 }
-
+  
 real[] x = sequence(sobs.length);
 
 // draw an invisible graph to set up the axes

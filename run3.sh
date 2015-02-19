@@ -69,4 +69,5 @@ mv num_periods.csv xcorr_pdfs/
 mv start_of_stationarity.csv xcorr_pdfs/
 mv period_lengths.csv xcorr_pdfs/
 mv period_powers.csv xcorr_pdfs/
+mv nonperiod_powers.csv xcorr_pdfs/
 

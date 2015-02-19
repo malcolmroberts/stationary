@@ -31,6 +31,8 @@ rm period_lengths.csv
 echo -e "#length of first cycle" > period_lengths.csv
 rm period_powers.csv
 echo -e "#power of first cycle" > period_powers.csv
+rm nonperiod_powers.csv
+echo -e "#power of non-periodic part" > nonperiod_powers.csv
 
 for i in $INPUTS:
 do
@@ -41,6 +43,7 @@ do
 	
 	startval=$(cat startval)
 	echo -e $startval >> start_of_stationarity.csv
+	rm startval
 
 	nper=$(cat nperiods)
 	echo -e $nper >> num_periods.csv
@@ -50,9 +53,13 @@ do
 	echo -e $perlength >> period_lengths.csv
 	rm period_length.csv
 
-	dapowah=$(cat period_power.csv)
-	echo -e $dapowah >> period_powers.csv
+	period_power=$(cat period_power.csv)
+	echo -e $period_power >> period_powers.csv
 	rm period_power.csv
+
+	nonperiod_power=$(cat nonperiod_power.csv)
+	echo -e $nonperiod_power >> nonperiod_powers.csv
+	rm nonperiod_power.csv
     fi
 done
 

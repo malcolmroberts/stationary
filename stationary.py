@@ -163,8 +163,10 @@ def main(argv):
         f.write("\def\\nperiods{" + str(0) + "}")
         f.close();
 
+    num_periods_output = "0"
     period_length_output = "0"
     period_power_output = "0"
+    nonperiod_power_output = str(ypower)
 
     if(start < 0):
         print "Signal is non-stationary."
@@ -190,6 +192,8 @@ def main(argv):
         print "Non-periodic part of signal has power "\
             + str(power(cycles[i][1]))
 
+        nonperiod_power_output = str(power(cycles[i][1]))
+
         write_y_to_file(yleft, "data.np", start)
 
         periods = []
@@ -200,12 +204,8 @@ def main(argv):
             write_y_to_file(cycles[i][1], "data.ytyp" + str(i))
             i += 1
 
+        num_periods_output = str(len(periods))
         if(texoutput):
-            # Output the number of periods for the bash script
-            f = open('nperiods', 'w')
-            f.write(str(len(periods)))
-            f.close();
-
             # Output the number of periods for the tex file
             f = open('tex/def_nperiods.tex', 'w')
             f.write("\def\\nperiods{" + str(len(periods)) + "}")
@@ -230,12 +230,6 @@ def main(argv):
                 period_length_output = str(periods[0])
                 period_power_output = str(periodpower[0])
     
-            # Write number of periods to file
-            f = open('nperiods', 'w')
-            f.write(str(len(periods)))
-            f.close();
-        
-
     f = open('period_length.csv', 'w')
     f.write(period_length_output)
     f.close()
@@ -243,6 +237,14 @@ def main(argv):
     f = open('period_power.csv', 'w')
     f.write(period_power_output)
     f.close()
+
+    f = open('nonperiod_power.csv', 'w')
+    f.write(nonperiod_power_output)
+    f.close()
+
+    f = open('nperiods', 'w')
+    f.write(num_periods_output)
+    f.close();
 
 # The main program is called from here
 if __name__ == "__main__":

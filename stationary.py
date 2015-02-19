@@ -163,12 +163,14 @@ def main(argv):
         f.write("\def\\nperiods{" + str(0) + "}")
         f.close();
 
+    period_length_output = "0"
+    period_power_output = "0"
 
     if(start < 0):
         print "Signal is non-stationary."
     else:
         print "Stationarity starts at " + str(start) +  " of " \
-            + str(len(data)) + " points (" + str((100.0*start) / len(data))\
+            + str(len(data)) + " points (" + str((100.0 * start) / len(data))\
             +" %)"
         data = data[start:len(data)]
         write_tv_seq_to_file(data, "data.stat")
@@ -209,20 +211,13 @@ def main(argv):
             f.write("\def\\nperiods{" + str(len(periods)) + "}")
             f.close();
     
-            f = open('period_length.csv', 'w')
-            if len(periods) == 0:
-                f.write(str(0))
-            else:
-                f.write(str(periods[0]))
-            f.close()
-
+            periodpower = []
             if len(periods) > 0:
                 # Write the period length to a file for use with latex.
                 f = open('tex/def_period.tex', 'w')
                 f.write("\def\periodlength{" + str(periods) + "}")
                 f.close()
     
-                periodpower = []
                 i = 0
                 while i < len(periods):
                     periodpower.append(power(cycles[i][1]))
@@ -230,11 +225,24 @@ def main(argv):
                 f = open('tex/def_period_power.tex', 'w')
                 f.write("\def\periodpower{" + str(periodpower) + "}")
                 f.close()
-            
+
+            if len(periods) > 0:
+                period_length_output = str(periods[0])
+                period_power_output = str(periodpower[0])
+    
             # Write number of periods to file
             f = open('nperiods', 'w')
             f.write(str(len(periods)))
             f.close();
+        
+
+    f = open('period_length.csv', 'w')
+    f.write(period_length_output)
+    f.close()
+
+    f = open('period_power.csv', 'w')
+    f.write(period_power_output)
+    f.close()
 
 # The main program is called from here
 if __name__ == "__main__":

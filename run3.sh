@@ -65,6 +65,14 @@ done
 
 asy -f pdf onset.asy
 mv onset.pdf xcorr_pdfs/
+
+asy -f pdf detected_period_power.asy -u" period_powers_filename = \"period_powers.csv\"; nonperiod_powers_filename = \"nonperiod_powers.csv\""
+mv detected_period_power xcorr_pdfs/
+
+asy -f pdf detected_period_length.asy -u" period_lengths_filename = \"period_lengths.csv\""
+
+mv detected_period_length.pdf xcorr_pdfs/
+
 mv num_periods.csv xcorr_pdfs/
 mv start_of_stationarity.csv xcorr_pdfs/
 mv period_lengths.csv xcorr_pdfs/

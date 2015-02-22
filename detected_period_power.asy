@@ -10,10 +10,16 @@ void drawbar(real x, real y, pen p = defaultpen, pen f = invisible) {
   filldraw(p0--p1--p2--p3--cycle, f, p);
 }
 
+string period_powers_filename = "";
+string nonperiod_powers_filename = "";
+
+usersetting();
+
 real[] period_powers;
 {
-  string filename = getstring("period powers file"); 
-  file f = input(filename).line();
+  if(period_powers_filename == "")
+    period_powers_filename = getstring("period powers file"); 
+  file f = input(period_powers_filename).line();
   real[][] a = f.dimension(0, 0);
   a = transpose(a);
   period_powers = a[0];
@@ -21,8 +27,9 @@ real[] period_powers;
 
 real[] nonperiod_powers;
 {
-  string filename = getstring("nonperiod powers file"); 
-  file f = input(filename).line();
+  if(nonperiod_powers_filename == "") 
+    nonperiod_powers_filename = getstring("nonperiod powers file"); 
+  file f = input(nonperiod_powers_filename).line();
   real[][] a = f.dimension(0, 0);
   a = transpose(a);
   nonperiod_powers = a[0];

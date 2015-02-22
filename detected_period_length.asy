@@ -10,10 +10,15 @@ void drawbar(real x, real y, pen p = defaultpen, pen f = invisible) {
   filldraw(p0--p1--p2--p3--cycle, f, p);
 }
 
+string period_lengths_filename = "";
+
+usersetting();
+
 real[] period_lengths;
 {
-  string filename = getstring("period lengths file"); 
-  file f = input(filename).line();
+  if(period_lengths_filename == "") 
+    period_lengths_filename = getstring("period lengths file"); 
+  file f = input(period_lengths_filename).line();
   real[][] a = f.dimension(0, 0);
   a = transpose(a);
   period_lengths = a[0];

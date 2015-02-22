@@ -40,8 +40,6 @@ startval=$(cat output/startval)
 asy -f pdf plot.asy  -u "filenames=\"output/data.in\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\" ; start=$startval"
 mv plot.pdf data.pdf
 
-asy -f pdf plot.asy  -u "filenames=\"output/data.np\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
-mv plot.pdf data_np.pdf
 
 if [ "$startval" -ge "0" ]; then
 
@@ -64,4 +62,8 @@ if [ "$startval" -ge "0" ]; then
 
 
     fi
+
+    asy -f pdf plot.asy  -u "filenames=\"output/data.np\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+    mv plot.pdf data_np.pdf
+
 fi

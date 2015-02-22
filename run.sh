@@ -30,7 +30,9 @@ echo "Running " $1
 
 rm -f data.ytyp*
 
+echo ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 ./stationary.py -f $1 $rstring $sstring $pstring -t 1
+
 
 startval=$(cat startval)
 

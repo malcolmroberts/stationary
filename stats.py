@@ -203,10 +203,12 @@ def is_stationary(y, stest, p_crit, minlen):
             return False
 
         Z = wald_wolfowitz(x)
-        if(np.abs(Z) > 1.96):
-            return False
-        else:
-            return True
+        p = scipy.stats.norm.sf(Z) * 2 #two-sided test.
+
+        # if(np.abs(Z) > 1.96):
+        #     return False
+        # else:
+        #     return True
 
     # requires 0.14 of scipy
     #A2, critical, p = scipy.stats.anderson_ksamp([y0,y1])

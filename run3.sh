@@ -41,25 +41,25 @@ do
 	echo $i
 	ionice -c 3 nice -n 19 ./run2.sh $i $rstring $2 $3
 	
-	startval=$(cat startval)
+	startval=$(cat output/startval)
 	echo -e $startval >> start_of_stationarity.csv
-	rm startval
+	rm output/startval
 
-	nper=$(cat nperiods)
-	echo -e $nper >> num_periods.csv
-	rm nperiods
+	nper=$(cat output/nperiods)
+	echo -e $nper >> output/num_periods.csv
+	rm output/nperiods
 
-	perlength=$(cat period_length.csv)
+	perlength=$(cat output/period_length.csv)
 	echo -e $perlength >> period_lengths.csv
-	rm period_length.csv
+	rm output/period_length.csv
 
-	period_power=$(cat period_power.csv)
+	period_power=$(cat output/period_power.csv)
 	echo -e $period_power >> period_powers.csv
-	rm period_power.csv
+	rm output/period_power.csv
 
-	nonperiod_power=$(cat nonperiod_power.csv)
+	nonperiod_power=$(cat output/nonperiod_power.csv)
 	echo -e $nonperiod_power >> nonperiod_powers.csv
-	rm nonperiod_power.csv
+	rm output/nonperiod_power.csv
     fi
 done
 

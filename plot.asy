@@ -8,7 +8,7 @@ string xlabel = "";
 string ylabel = "";
 bool logscale = false;
 bool x95 = false;
-real start = 0;
+real start = -1;
 usersetting();
 
 if(filenames == "")
@@ -29,7 +29,6 @@ if(sscale == "linlog") {
   scale(Linear, Log);
   logscale = true;
 }
-
 
 string filename;
 int n = -1;
@@ -71,11 +70,6 @@ while(flag) {
       real nf = 1.96 / sqrt(x.length);
       //-1.96/sqrt(length(x));
       draw(graph(x, y), Pen(n), texify("data file"));
-
-      if(start > 0) {
-	// Inidicate the start of stationarity.
-	xequals(start, grey + dashed);
-      }
 	
       if(x95) {
 	// draw 95% confidence intervals
@@ -86,6 +80,12 @@ while(flag) {
       
     }
   }
+}
+
+if(start >= 0) {
+  // Inidicate the start of stationarity.
+  xequals((string)start,start, dashed);
+  //XEquals(start);
 }
 
 if(xlabel == "")

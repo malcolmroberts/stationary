@@ -36,11 +36,9 @@ def process_stationary_signal(start, data, round):
     # Compute the autocorrelation and normalize
     yac = autocorrelate(y)
     yac = normalize_by_first(yac)
-    #write_y_to_file(yac, "data.ac")
 
     # The FFT of the autocorrelation
     fac = np.fft.rfft(yac)
-    write_abs_y_to_file(fac, "data.fac")
 
     # Find all periodic components, store in the cycles array.
     # Last element of array contains remainder.
@@ -122,8 +120,6 @@ def main(argv):
         data.append(row)
     print str(len(data)) + " data points found"
 
-    # Write the input to file.
-    write_tv_seq_to_file(data, "data.in")
 
     ypower = power(y_part(data))
     print "Power of input signal: " + str(ypower)
@@ -134,7 +130,76 @@ def main(argv):
     # Consider only the stationary part of the data:
     start = stationary_part(data, stest, p, preremove_cycles, round)
 
+    num_periods_output = "0"
+    period_length_output = "0"
+    period_power_output = "0"
+    nonperiod_power_output = str(ypower)
+
+    yac = [] #
+    fac = [] #
+    cycles = [] #
+    yleft = [] #
+    periods = [] #
+    periodpower = [] #
+
+    if(start < 0):
+        print "Signal is non-stationary."
+    else:
+        print "Stationarity starts at " + str(start) +  " of " \
+            + str(len(data)) + " points (" + str((100.0 * start) / len(data))\
+            +" %)"
+        data = data[start:len(data)]
+        yac, fac, cycles, yleft = process_stationary_signal(start, data, round)
+    
+        corrlen = correlation_length(yleft)
+        print "Correlation length of remainder is " + str(corrlen)
+
+        i = 0
+        while i < len(cycles)-1:
+            print "Period length " + str(cycles[i][0]) \
+                + " has power " + str(power(cycles[i][1]))
+            i += 1
+        print "Non-periodic part of signal has power "\
+            + str(power(cycles[i][1]))
+
+        nonperiod_power_output = str(power(cycles[i][1]))
+
+        i = 0
+        while i < len(cycles)-1:
+            periods.append(cycles[i][0])
+            i += 1
+
+        num_periods_output = str(len(periods))
+        if(texoutput):
+            # Output the number of periods for the tex file
+    
+
+            if len(periods) > 0:
+                i = 0
+                while i < len(periods):
+                    periodpower.append(power(cycles[i][1]))
+                    i += 1
+                period_length_output = str(periods[0])
+                period_power_output = str(periodpower[0])
+
     if(texoutput):
+        if not os.path.exists("tex"):
+            os.makedirs("tex")
+
+        if len(periods) > 0:
+            # Write the period length to a file for use with latex.
+            f = open('tex/def_period.tex', 'w')
+            f.write("\def\periodlength{" + str(periods) + "}")
+            f.close()
+
+        f = open('tex/def_nperiods.tex', 'w')
+        f.write("\def\\nperiods{" + str(len(periods)) + "}")
+        f.close();
+
+        f = open('tex/def_period_power.tex', 'w')
+        f.write("\def\periodpower{" + str(periodpower) + "}")
+        f.close()
+
         # Write the period length to a file for use with latex.
         f = open('tex/defrun.tex', 'w')
         f.write("\def\\filename{" + filename + "}\n")
@@ -148,7 +213,7 @@ def main(argv):
 
         # Output the start of stationarity for the bash script for the
         # asy figures
-        f = open('startval', 'w')
+        f = open('output/startval', 'w')
         f.write(str(start))
         f.close();
 
@@ -157,94 +222,40 @@ def main(argv):
         f.write("\def\corrlen{" + str(corrlen) + "}")
         f.close();
 
-        # Output the number of periods for the tex file
-        # NB: overwritten if periods are actually found
-        f = open('tex/def_nperiods.tex', 'w')
-        f.write("\def\\nperiods{" + str(0) + "}")
+    write_output = True
+    if(write_output):
+        if not os.path.exists("output"):
+            os.makedirs("output")
+
+        # Write the input to file.
+        write_tv_seq_to_file(data, "output/data.in")
+
+        if(start >= 0):
+            write_y_to_file(yleft, "output/data.np", start)
+            write_y_to_file(yac, "output/data.ac")
+            write_abs_y_to_file(fac, "output/data.fac")
+            write_tv_seq_to_file(data, "output/data.stat")
+
+            i = 0
+            while i < len(cycles)-1:
+                write_y_to_file(cycles[i][1], "output/data.ytyp" + str(i))
+                i += 1
+  
+        f = open('output/period_length.csv', 'w')
+        f.write(period_length_output)
+        f.close()
+
+        f = open('output/period_power.csv', 'w')
+        f.write(period_power_output)
+        f.close()
+
+        f = open('output/nonperiod_power.csv', 'w')
+        f.write(nonperiod_power_output)
+        f.close()
+
+        f = open('output/nperiods', 'w')
+        f.write(num_periods_output)
         f.close();
-
-    num_periods_output = "0"
-    period_length_output = "0"
-    period_power_output = "0"
-    nonperiod_power_output = str(ypower)
-
-    if(start < 0):
-        print "Signal is non-stationary."
-    else:
-        print "Stationarity starts at " + str(start) +  " of " \
-            + str(len(data)) + " points (" + str((100.0 * start) / len(data))\
-            +" %)"
-        data = data[start:len(data)]
-        write_tv_seq_to_file(data, "data.stat")
-        yac, fac, cycles, yleft = process_stationary_signal(start, data, round)
-    
-        corrlen = correlation_length(yleft)
-        print "Correlation length of remainder is " + str(corrlen)
-
-        write_y_to_file(yac, "data.ac")
-        write_abs_y_to_file(fac, "data.fac")
-
-        i = 0
-        while i < len(cycles)-1:
-            print "Period length " + str(cycles[i][0]) \
-                + " has power " + str(power(cycles[i][1]))
-            i += 1
-        print "Non-periodic part of signal has power "\
-            + str(power(cycles[i][1]))
-
-        nonperiod_power_output = str(power(cycles[i][1]))
-
-        write_y_to_file(yleft, "data.np", start)
-
-        periods = []
-        i = 0
-        while i < len(cycles)-1:
-            #print "period="+str(cycles[i][0])
-            periods.append(cycles[i][0])
-            write_y_to_file(cycles[i][1], "data.ytyp" + str(i))
-            i += 1
-
-        num_periods_output = str(len(periods))
-        if(texoutput):
-            # Output the number of periods for the tex file
-            f = open('tex/def_nperiods.tex', 'w')
-            f.write("\def\\nperiods{" + str(len(periods)) + "}")
-            f.close();
-    
-            periodpower = []
-            if len(periods) > 0:
-                # Write the period length to a file for use with latex.
-                f = open('tex/def_period.tex', 'w')
-                f.write("\def\periodlength{" + str(periods) + "}")
-                f.close()
-    
-                i = 0
-                while i < len(periods):
-                    periodpower.append(power(cycles[i][1]))
-                    i += 1
-                f = open('tex/def_period_power.tex', 'w')
-                f.write("\def\periodpower{" + str(periodpower) + "}")
-                f.close()
-
-            if len(periods) > 0:
-                period_length_output = str(periods[0])
-                period_power_output = str(periodpower[0])
-    
-    f = open('period_length.csv', 'w')
-    f.write(period_length_output)
-    f.close()
-
-    f = open('period_power.csv', 'w')
-    f.write(period_power_output)
-    f.close()
-
-    f = open('nonperiod_power.csv', 'w')
-    f.write(nonperiod_power_output)
-    f.close()
-
-    f = open('nperiods', 'w')
-    f.write(num_periods_output)
-    f.close();
 
 # The main program is called from here
 if __name__ == "__main__":

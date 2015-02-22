@@ -22,7 +22,6 @@ if [ "$1" != "" ]; then
     mkdir -p xcorr_pdfs
     cp tex/transforms.pdf xcorr_pdfs/$outfile.pdf
 
-
 else
     echo "specify the file!"
 fi

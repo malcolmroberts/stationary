@@ -28,39 +28,40 @@ echo "Running " $1
 
 #./change_format.py $1 cfile
 
-rm -f data.ytyp*
+rm -f output/*
 
 echo ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 
-
-startval=$(cat startval)
+#set -x
+startval=$(cat output/startval)
 
 # original file minus linear term, and add the typical cycle
-asy -f pdf plot.asy  -u "filenames=\"data.in\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\" ; start=$startval"
+asy -f pdf plot.asy  -u "filenames=\"output/data.in\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\" ; start=$startval"
 mv plot.pdf data.pdf
+
+asy -f pdf plot.asy  -u "filenames=\"output/data.np\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
+mv plot.pdf data_np.pdf
 
 if [ "$startval" -ge "0" ]; then
 
     # autocorrelation
-    asy -f pdf plot.asy  -u "filenames=\"data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\" ; x95=true"
+    asy -f pdf plot.asy  -u "filenames=\"output/data.ac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"linlin\" ; x95=true"
     mv plot.pdf data_ac.pdf
 
     # FFT of autocorrelation
-    asy -f pdf plot.asy  -u "filenames=\"data.fac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"loglog\""
+    asy -f pdf plot.asy  -u "filenames=\"output/data.fac\"; xlabel=\"lag\"; ylabel=\"correlation\"; sscale=\"loglog\""
     mv plot.pdf data_fac.pdf
 
-    nperiods=$(cat nperiods)
+    nperiods=$(cat output/nperiods)
 
     if [ $nperiods != "0" ]; then
 	# find all the typical run files, turn newlines into commas,
 	# remove last comma.
-	TYPS=$(ls -1 | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
-	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""  &> /dev/null
+	TYPS=$(ls -1 output/ | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
+	asy -f pdf plot.asy  -u "filenames=\"output/${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""  &> /dev/null
 	mv plot.pdf data_typ.pdf
 
-    asy -f pdf plot.asy  -u "filenames=\"data.np\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""
-    mv plot.pdf data_np.pdf
 
     fi
 fi

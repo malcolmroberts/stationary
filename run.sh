@@ -28,7 +28,7 @@ echo "Running " $1
 
 #./change_format.py $1 cfile
 
-rm -f output/*
+#rm -f output/*
 
 echo ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 ./stationary.py -f $1 $rstring $sstring $pstring -t 1
@@ -39,7 +39,6 @@ startval=$(cat output/startval)
 # original file minus linear term, and add the typical cycle
 asy -f pdf plot.asy  -u "filenames=\"output/data.in\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\" ; start=$startval"
 mv plot.pdf data.pdf
-
 
 if [ "$startval" -ge "0" ]; then
 
@@ -59,7 +58,6 @@ if [ "$startval" -ge "0" ]; then
 	TYPS=$(ls -1 output/data.ytyp* | egrep 'data.ytyp' | tr '\n' ','| sed s'/.$//' )
 	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""  &> /dev/null
 	mv plot.pdf data_typ.pdf
-
 
     fi
 

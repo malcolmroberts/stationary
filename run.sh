@@ -33,7 +33,7 @@ rm -f output/*
 echo ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 
-set -x
+#set -x
 startval=$(cat output/startval)
 
 # original file minus linear term, and add the typical cycle

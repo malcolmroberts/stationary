@@ -33,7 +33,7 @@ rm -f output/*
 echo ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 
-#set -x
+set -x
 startval=$(cat output/startval)
 
 # original file minus linear term, and add the typical cycle
@@ -58,8 +58,8 @@ if [ "$startval" -ge "0" ]; then
     if [ $nperiods != "0" ]; then
 	# find all the typical run files, turn newlines into commas,
 	# remove last comma.
-	TYPS=$(ls -1 output/ | egrep 'data.ytyp[0-9]' | tr '\n' ','| sed s'/.$//' )
-	asy -f pdf plot.asy  -u "filenames=\"output/${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""  &> /dev/null
+	TYPS=$(ls -1 output/data.ytyp* | egrep 'data.ytyp' | tr '\n' ','| sed s'/.$//' )
+	asy -f pdf plot.asy  -u "filenames=\"${TYPS}\"; xlabel=\"time\"; ylabel=\"signal\"; sscale=\"linlin\""  &> /dev/null
 	mv plot.pdf data_typ.pdf
 
 

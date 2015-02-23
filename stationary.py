@@ -203,7 +203,7 @@ def main(argv):
         # Write the period length to a file for use with latex.
         f = open('tex/defrun.tex', 'w')
         f.write("\def\\filename{" + filename + "}\n")
-        f.write("\def\\smethod{" + stest + "}")
+        f.write("\def\\smethod{" + stest + ", p=" +str(p) +"}")
         f.close();
 
         # Write the period length to a file for use with latex.

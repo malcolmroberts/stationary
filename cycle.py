@@ -68,31 +68,65 @@ def normalize_by_first(y):
 # spaced points with y-values y0, y1, and y2.
 def paramax(y0, y1, y2):
     if(np.abs(y0) > 0 and np.abs(y1) > 0 and np.abs(y2) > 0):
-        return 0.5 * (y0 - y2) / (y0 - 2 * y1 +y2)
+        return 0.5 * (y0 - y2) / (y0 - 2 * y1 + y2)
     return 0
 
 # Return the index of the largest mode in a Fourier series Y, the
 # interpolate (using a quadratic approximation around the max) to find
 # the actual frequency corresponding to the maximum.
 # Y is the FFT of the signal or its autocorrelation.
-def dominant_freq(Y):
-    max = 0.0
-    i = 0
-    imax = 0
+def dominant_freq(Y, threshold):
+    find_local_max = False
 
-    while i < len(Y):
-        amp = abs(Y[i])
-        if amp > max:
-            max = amp
+    yamp = abs(Y[0:int(np.floor(len(Y)/2))])
+
+    imax = 0
+    max = 0.0
+    i = 1
+    while i < len(yamp):
+        if yamp[i] > max:
             imax = i
+            max = yamp[i]
         i += 1
+    #print "global_imax:", imax, yamp[imax]
+
+    if find_local_max:
+        meany = sum(yamp) / len(yamp)
+        print "meany: ", meany
+        rmsy = 0
+        i = 0
+        while i < len(yamp):
+            val = meany - yamp[i] 
+            rmsy += val * val
+            i += 1
+        rmsy = np.sqrt(rmsy / len(yamp))
+
+        threshold = meany + rmsy
+        print "threshold: ", threshold
+
+        # find the local maxima
+        local_imax = []
+        i = 1
+        while i < len(yamp) - 1:
+            if yamp[i] > threshold:
+                if yamp[i] > yamp[i - 1] and yamp[i] > yamp[i + 1]:
+                    local_imax.append(i)
+            i += 1
+        print "local_imax:"
+        i = 0
+        while i < len(local_imax):
+            print local_imax[i], yamp[local_imax[i]]
+            i += 1
+        print threshold
+
+        return local_imax[0]
 
     return imax
 
 # Return the dominant frequency using an iterative algorithm:
 # Y is the FFT of the signal or its autocorrelation.
 # n is the length of the original data.
-def detect_period(Y,n):
+def detect_period(Y, n):
     maxit = 64 # Maximum number of iterations
     maxerr = 1e-3 # Tolerance for the difference between the detected
                   # mode and the nearest mode on the grid.
@@ -111,19 +145,21 @@ def detect_period(Y,n):
     i = 0
     while cont:
         # Mode (on the grid) with max frequency:
-        freq_i = dominant_freq(Y[0:int(np.floor(nfit / 2))])
+        freq_i = dominant_freq(Y[0:int(np.floor(nfit / 2))], 1.96 / np.sqrt(n))
 
         if freq_i == 0:
             return 1
 
         # Interpolate around the peak to see if there's a better max:
-        ishift = paramax(abs(Y[freq_i-1]), abs(Y[freq_i]), abs(Y[freq_i+1]))
+        ishift = paramax(abs(Y[freq_i - 1]), abs(Y[freq_i]), abs(Y[freq_i + 1]))
         # Interpolated frequency:
 	freq = freq_i + ishift
 
         # Length of period from interpolated frequency:
         period = n / freq
         
+        #print "period: ", period
+
         # Number of interpolated periods that fit in data:
         nperiod = int(np.floor(n / period))
         
@@ -131,7 +167,7 @@ def detect_period(Y,n):
         nfit = int(np.floor(nperiod * period))
         
         # Difference between frequency and nearest integral mode:
-        err = np.abs(freq-np.round(freq))
+        err = np.abs(freq - np.round(freq))
 
         # Stop if the number of cycles that fits changes by less than
         # 1 data point per iteration.
@@ -155,7 +191,9 @@ def detect_period(Y,n):
             #print "period="+str(period)
             #print "nperiod="+str(nperiod)
             #print "err="+str(err)
-            cont=False
+            cont = False
+
+        cont = False # FIXME: temp
 
         i += 1
 
@@ -250,7 +288,7 @@ def typical_cycle_error(period, data, ytyp):
 
 
 def significant_cycle(yac):
-    izero = 0
+    izero = 0 # first zero-crossing of autocorrelation
 
     i = 0
     while(izero == 0 and i < len(yac)):
@@ -262,13 +300,13 @@ def significant_cycle(yac):
 
     i = izero
     while(i < n):
-        #ac95 = 1.96 / np.sqrt(n)
-        ac95 = (-1 + 1.96 * np.sqrt(n - i - 1))/(n-i)
+        ac95 = 1.96 / np.sqrt(n)
+        #ac95 = (-1 + 1.96 * np.sqrt(n - i - 1))/(n-i)
         if(np.abs(yac[i]) > ac95):
             return True
         i += 1
 
-    return (False)
+    return False
 
 # Find all periods in the input data y.
 # Input: sequence y, bool round (if we're rounding to integral periods)
@@ -287,18 +325,18 @@ def find_multiple_periods(y, round):
         yac = normalize_by_first(yac)
 
         if not significant_cycle(yac):
-           return cycles
+            return cycles, y
 
         fac = np.fft.rfft(yac)
-        p = detect_period(fac,len(yac))
-    
+        p = detect_period(fac, len(yac))
+
         if p > len(yac) / min_ncycles:
             p = 1
         
         if p > 1:
             if(round):
-                p=np.round(p)
-
+                p = np.round(p)
+        
         # don't repeat periods
         i = 0
         while (i < len(cycles)):

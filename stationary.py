@@ -54,7 +54,7 @@ def main(argv):
         "\t-f <filename> Input filename.\n"\
         "\t-r <0 or 1 (default)> Round period to nearest ineteger?\n"\
         "\t-s <ks (default), wsr, updownruns, highlowruns> Choice of statistical test.\n"\
-        "\t-p <real, defaul=0.1>\ Specify p-value for stationarity.\n"\
+        "\t-p <real, defaul=0.01>\ Specify p-value for stationarity.\n"\
         "\t-c <0 or 1 (default=1)> Remove cycles before testing for stationairty.\n"\
         "\t-t <0 or 1 (default=0)> Create ouput files for tex.\n"\
         "\t-h display help message\n"
@@ -66,7 +66,7 @@ def main(argv):
     preremove_cycles = True
     round = True
     #round=False
-    p = 0.1
+    p = 0.01
     stest = "ks"
     texoutput = False
 
@@ -170,17 +170,14 @@ def main(argv):
             i += 1
 
         num_periods_output = str(len(periods))
-        if(texoutput):
-            # Output the number of periods for the tex file
-    
 
-            if len(periods) > 0:
-                i = 0
-                while i < len(periods):
-                    periodpower.append(power(cycles[i][1]))
-                    i += 1
-                period_length_output = str(periods[0])
-                period_power_output = str(periodpower[0])
+        if len(periods) > 0:
+            i = 0
+            while i < len(periods):
+                periodpower.append(power(cycles[i][1]))
+                i += 1
+            period_length_output = str(periods[0])
+            period_power_output = str(periodpower[0])
 
     if(texoutput):
         if not os.path.exists("tex"):

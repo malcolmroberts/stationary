@@ -13,10 +13,17 @@ void drawbar(real x, real y, pen p = defaultpen, pen f = invisible) {
 // offset for placement of sp text
 real offset = 0.005;
 
+string sobs_filename = "";
+string pobs_filename = "";
+
+usersetting();
+
 // end of warmup from the observations
 real[] sobs;
 {
-  file f = input("start_of_stationarity.csv").line();
+  if(sobs_filename == "")
+    sobs_filename = getstring("start of stationarity filename");
+  file f = input(sobs_filename).line();
   real[][] a = f.dimension(0, 0);
   a = transpose(a);
   //write(a[0].length);
@@ -26,7 +33,9 @@ real[] sobs;
 // presence of periodicity as per observations
 real[] pobs;
 {
-  file f = input("num_periods.csv").line();
+  if(pobs_filename == "")
+    pobs_filename = getstring("number of periods filename");
+  file f = input(sobs_filename).line();
   real[][] prr = f.dimension(0, 0);
   prr = transpose(prr);
   pobs = prr[0];

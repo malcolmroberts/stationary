@@ -148,8 +148,8 @@ def main(argv):
         print "Stationarity starts at " + str(start) +  " of " \
             + str(len(data)) + " points (" + str((100.0 * start) / len(data))\
             +" %)"
-        data = data[start:len(data)]
-        yac, fac, cycles, yleft = process_stationary_signal(start, data, round)
+        #data = 
+        yac, fac, cycles, yleft = process_stationary_signal(start, data[start:len(data)], round)
     
         corrlen = correlation_length(yleft)
         print "Correlation length of remainder is " + str(corrlen)

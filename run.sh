@@ -28,7 +28,7 @@ echo "Running " $1
 
 #./change_format.py $1 cfile
 
-#rm -f output/*
+rm -f output/*
 
 echo ./stationary.py -f $1 $rstring $sstring $pstring -t 1
 ./stationary.py -f $1 $rstring $sstring $pstring -t 1

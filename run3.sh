@@ -24,25 +24,25 @@ mkdir -p xcorr_pdfs
 
 mkdir -p output
 
-rm -f output/start_of_stationarity.csv
-touch output/start_of_stationarity.csv
-echo -e "#start_of_stationarity" > output/start_of_stationarity.csv
+rm -f xcorr_pdfs/start_of_stationarity.csv
+#touch xcorr_pdfs/start_of_stationarity.csv
+echo -e "#start_of_stationarity" > xcorr_pdfs/start_of_stationarity.csv
 
-rm -f output/num_periods.csv
-touch output/num_periods.csv
-echo -e "#number of periods" > output/num_periods.csv
+rm -f xcorr_pdfs/num_periods.csv
+touch xcorr_pdfs/num_periods.csv
+echo -e "#number of periods" > xcorr_pdfs/num_periods.csv
 
-rm -f output/period_lengths.csv
-touch output/period_lengths.csv
-echo -e "#length of first cycle" > output/period_lengths.csv
+rm -f xcorr_pdfs/period_lengths.csv
+touch xcorr_pdfs/period_lengths.csv
+echo -e "#length of first cycle" > xcorr_pdfs/period_lengths.csv
 
-rm -f output/period_powers.csv
-touch output/period_powers.csv
-echo -e "#power of first cycle" > output/period_powers.csv
+rm -f xcorr_pdfs/period_powers.csv
+touch xcorr_pdfs/period_powers.csv
+echo -e "#power of first cycle" > xcorr_pdfs/period_powers.csv
 
-rm -f output/nonperiod_powers.csv
-touch output/nonperiod_powers.csv
-echo -e "#power of non-periodic part" > output/nonperiod_powers.csv
+rm -f xcorr_pdfs/nonperiod_powers.csv
+touch xcorr_pdfs/nonperiod_powers.csv
+echo -e "#power of non-periodic part" > xcorr_pdfs/nonperiod_powers.csv
 
 for i in $INPUTS:
 do
@@ -52,40 +52,37 @@ do
 	ionice -c 3 nice -n 19 ./run2.sh $i $rstring $2 $3
 	
 	startval=$(cat output/startval)
-	echo -e $startval >> output/start_of_stationarity.csv
+	echo -e $startval >> xcorr_pdfs/start_of_stationarity.csv
 	rm -f output/startval
 
 	nper=$(cat output/nperiods)
-	echo -e $nper >> output/num_periods.csv
+	echo -e $nper >> xcorr_pdfs/num_periods.csv
 	rm -f output/nperiods
 
 	perlength=$(cat output/period_length.csv)
-	echo -e $perlength >> output/period_lengths.csv
+	echo -e $perlength >> xcorr_pdfs/period_lengths.csv
 	rm -f output/period_length.csv
 
 	period_power=$(cat output/period_power.csv)
-	echo -e $period_power >> output/period_powers.csv
+	echo -e $period_power >> xcorr_pdfs/period_powers.csv
 	rm -f output/period_power.csv
 
 	nonperiod_power=$(cat output/nonperiod_power.csv)
-	echo -e $nonperiod_power >> output/nonperiod_powers.csv
+	echo -e $nonperiod_power >> xcorr_pdfs/nonperiod_powers.csv
 	rm -f output/nonperiod_power.csv
     fi
 done
 
-asy -f pdf onset.asy
+
+asy -f pdf onset.asy  -u" sobs_filename = \"xcorr_pdfs/start_of_stationarity.csv\"; pobs_filename = \"xcorr_pdfs/num_periods.csv\""
 mv onset.pdf xcorr_pdfs/
 
-asy -f pdf detected_period_power.asy -u" period_powers_filename = \"output/period_powers.csv\"; nonperiod_powers_filename = \"output/nonperiod_powers.csv\""
-mv detected_period_power xcorr_pdfs/
+asy -f pdf detected_period_power.asy -u" period_powers_filename = \"xcorr_pdfs/period_powers.csv\"; nonperiod_powers_filename = \"xcorr_pdfs/nonperiod_powers.csv\""
+mv detected_period_power.pdf xcorr_pdfs/
 
-asy -f pdf detected_period_length.asy -u" period_lengths_filename = \"output/period_lengths.csv\""
+asy -f pdf detected_period_length.asy -u" period_lengths_filename = \"xcorr_pdfs/period_lengths.csv\""
 
 mv detected_period_length.pdf xcorr_pdfs/
 
-mv num_periods.csv xcorr_pdfs/
-mv output/start_of_stationarity.csv xcorr_pdfs/
-mv output/period_lengths.csv xcorr_pdfs/
-mv output/period_powers.csv xcorr_pdfs/
-mv output/nonperiod_powers.csv xcorr_pdfs/
+
 
